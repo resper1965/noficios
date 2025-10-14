@@ -1,0 +1,8 @@
+schema: 1
+story: 'platform.deploy-frontend-backend-lgpd'
+gate: PASS
+status_reason: 'Deploy conclu7do; LGPD: bucket restrito e acesso mediado prontos.'
+reviewer: 'Quinn'
+updated: '$(date -u +%Y-%m-%dT%H:%M:%SZ)'
+top_issues: []
+waiver: { active: false }

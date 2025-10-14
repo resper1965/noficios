@@ -1,0 +1,10 @@
+# root ignores
+**/node_modules/
+**/.next/
+**/.turbo/
+**/.vercel/
+**/.cache/
+.env*
+__pycache__/
+*.pyc
+bmad/

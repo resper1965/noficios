@@ -1,0 +1,12 @@
+name: redirect-http-to-https
+defaultService: global/backendServices/oficios-portal-frontend-bes
+hostRules:
+- hosts:
+  - oficio.ness.tec.br
+  pathMatcher: pm-1
+pathMatchers:
+- name: pm-1
+  defaultUrlRedirect:
+    httpsRedirect: true
+    stripQuery: false
+    redirectResponseCode: MOVED_PERMANENTLY_DEFAULT
