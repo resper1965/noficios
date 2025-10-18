@@ -5,13 +5,18 @@
  * e tratamento de erros consistente
  */
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Obter token Supabase do usuário atual
  */
 async function getAuthToken(): Promise<string | null> {
-  const supabase = createClientComponentClient();
+  // Usar o cliente Supabase padrão para obter a sessão
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  
   const { data: { session } } = await supabase.auth.getSession();
   return session?.access_token || null;
 }
