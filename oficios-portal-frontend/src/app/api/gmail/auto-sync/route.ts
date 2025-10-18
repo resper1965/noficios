@@ -11,10 +11,11 @@ async function handleAutoSync(
   request: NextRequest,
   validated: { email: string; label: string }
 ) {
-  const log = createRequestLogger(request);
-  const { email, label } = validated;
+  try {
+    const log = createRequestLogger(request);
+    const { email, label } = validated;
 
-  log.info('Gmail sync requested', { email, label });
+    log.info('Gmail sync requested', { email, label });
 
     // GAP-003: Backend Python Integration
     // Decision: Waived for MVP - Feature planned for v2
@@ -31,18 +32,22 @@ async function handleAutoSync(
     };
 
     // Log for future implementation tracking
-    console.info('[GMAIL_SYNC] Sync request (waived feature)', {
+    log.info('[GMAIL_SYNC] Sync request (waived feature)', {
       email,
       label,
-      timestamp: new Date().toISOString(),
       note: 'Feature waived - see ADR-002'
     });
 
     return NextResponse.json(results, { status: 202 }); // 202 Accepted
   } catch (error) {
-    console.error('❌ Erro na auto-sincronização:', error);
+    const log = createRequestLogger(request);
+    log.error('Auto-sincronização failed', error instanceof Error ? error : new Error(String(error)));
+    
     return NextResponse.json(
-      { error: 'Erro na sincronização', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Erro na sincronização', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
       { status: 500 }
     );
   }

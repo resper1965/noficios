@@ -67,7 +67,7 @@ export function withValidation<T>(
           error: 'Validation failed',
           message: 'The request body contains invalid data',
           code: 'VALIDATION_ERROR',
-          details: error.errors.map(err => ({
+          details: error.issues.map(err => ({
             path: err.path.join('.'),
             message: err.message,
             code: err.code
@@ -172,7 +172,7 @@ export function validateQueryParams<T>(
       return NextResponse.json(
         {
           error: 'Invalid query parameters',
-          details: error.errors
+          details: error.issues
         },
         { status: 400 }
       );
