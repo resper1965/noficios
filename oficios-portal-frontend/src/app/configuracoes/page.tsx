@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuthSupabase';
+import { ProductBrand } from '@/components/Logo';
 import {
   ArrowLeft,
   Mail,

@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuthSupabase';
 import { supabaseService as apiService } from '@/lib/supabase';
+import { ProductBrand } from '@/components/Logo';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 
 export default function NovoOficioPage() {

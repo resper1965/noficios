@@ -4,6 +4,7 @@ import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOficio } from '@/hooks/useOficios';
 import { supabaseService as apiService } from '@/lib/supabase';
+import { ProductBrand } from '@/components/Logo';
 import {
   ArrowLeft,
   FileText,

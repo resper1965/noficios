@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuthSupabase';
 import { useOficios } from '@/hooks/useOficios';
 import { supabaseService as apiService, Oficio } from '@/lib/supabase';
+import { ProductBrand } from '@/components/Logo';
 import {
   Plus,
   Search,
@@ -136,14 +137,7 @@ export default function OficiosPage() {
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <div className="flex items-center space-x-2">
-              <div className="text-2xl font-bold text-white">
-                ness<span className="text-[#00ADE8]">.</span>
-              </div>
-              <div className="text-lg text-gray-300 font-medium">
-                oficios
-              </div>
-            </div>
+            <ProductBrand product="Oficios" size="sm" variant="light" />
           </div>
 
           <div className="flex items-center space-x-4">

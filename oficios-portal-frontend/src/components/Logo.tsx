@@ -39,7 +39,7 @@ export function Logo({
   
   return (
     <div className={`inline-flex flex-col items-center ${className}`}>
-      <div className={`${sizeClasses[size].brand} font-bold ${textColor} leading-none`}>
+      <div className={`${sizeClasses[size].brand} font-montserrat font-medium ${textColor} leading-none`}>
         ness<span className="text-[#00ADE8]">.</span>
       </div>
       {showProduct && productName && (
@@ -59,7 +59,7 @@ export function BrandText({
   const textColor = variant === 'light' ? 'text-white' : 'text-gray-900';
   
   return (
-    <span className={`${sizeClasses[size].brand} font-bold ${textColor} ${className}`}>
+    <span className={`${sizeClasses[size].brand} font-montserrat font-medium ${textColor} ${className}`}>
       ness<span className="text-[#00ADE8]">.</span>
     </span>
   );
@@ -78,8 +78,9 @@ export function ProductBrand({
   const textColor = variant === 'light' ? 'text-white' : 'text-gray-900';
   
   // Formato: n.Produto (tudo inline)
+  // "n" e produto em preto/branco, "." em #00ADE8, usando Montserrat Medium
   return (
-    <div className={`${sizeClasses[size].brand} font-bold ${textColor} ${className}`}>
+    <div className={`${sizeClasses[size].brand} font-montserrat font-medium ${textColor} ${className}`}>
       n<span className="text-[#00ADE8]">.</span>{product}
     </div>
   );
