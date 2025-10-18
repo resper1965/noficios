@@ -1,106 +1,81 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import Logo from '@/components/Logo';
+import { useAuth } from '@/hooks/useAuthSupabase';
 
 export default function LoginPage() {
+  const { user, loading, signInWithGoogle } = useAuth();
   const router = useRouter();
-  const { user, loading, signInWithGoogle, isSigningIn, loginError, clearLoginError } = useAuth();
-  const [mounted, setMounted] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    try {
-      const params = new URLSearchParams(window.location.search);
-      setShowDebug(params.get('debugAuth') === '1');
-    } catch {}
-  }, [mounted]);
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/dashboard');
+      router.push('/dashboard');
     }
   }, [user, loading, router]);
 
-  const handleLogin = async () => {
-    clearLoginError();
-    await signInWithGoogle();
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md mx-auto border border-border rounded-xl">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex items-center justify-center mb-2">
-            <Logo variant="light" size="lg" />
-          </div>
-          <CardTitle className="text-2xl text-foreground">n.Oficios</CardTitle>
-          <CardDescription className="text-muted-foreground">Acesse com sua conta</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {/* Formulário (shadcn/ui) - placeholder para futuros métodos */}
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" placeholder="seu.nome@empresa.com" autoComplete="email" disabled />
-          </div>
-          <Button
-            variant="default"
-            onClick={handleLogin}
-            disabled={isSigningIn}
-            className="w-full"
-          >
-            {isSigningIn ? 'Conectando...' : 'Entrar com Google'}
-          </Button>
-
-          {mounted && showDebug && (
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={async () => {
-                  try {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('forcePopup', '1');
-                    window.history.replaceState({}, '', url.toString());
-                    await handleLogin();
-                  } catch {}
-                }}
-              >
-                Tentar com popup
-              </Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 flex items-center justify-center p-4">
+      <div className="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md border border-gray-700/50 shadow-2xl">
+        <div className="text-center mb-8">
+          <div className="mb-4">
+            <div className="text-6xl font-bold text-white mb-2">
+              ness<span className="text-[#00ADE8]">.</span>
             </div>
-          )}
-
-          {loginError && (
-            <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded p-2 text-center">
-              {loginError}
+            <div className="text-xl text-gray-300 font-medium">
+              oficios
             </div>
-          )}
-
-          <p className="text-xs text-muted-foreground text-center">
-            Ao acessar, você concorda com os Termos de Uso e a Política de Privacidade.
+          </div>
+          <p className="text-gray-300 text-lg">
+            Acesse sua conta para continuar
           </p>
-        </CardContent>
-        {mounted && showDebug && (
-          <div className="p-4 border-t border-border text-left text-xs text-muted-foreground overflow-x-auto">
-            <pre>{JSON.stringify({ userPresent: !!user, loading, loginError, env: typeof window !== 'undefined' ? (window as any).__ENV : null }, null, 2)}</pre>
+        </div>
+        
+        <div className="space-y-4">
+          <button
+            onClick={signInWithGoogle}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
+          >
+            Continuar com Google
+          </button>
+
+          <div className="relative flex items-center justify-center my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+            <div className="relative bg-gray-800/50 px-4 text-sm text-gray-400 uppercase tracking-wider">
+              ou
+            </div>
           </div>
-        )}
-      </Card>
+
+          <button
+            className="w-full bg-transparent border border-gray-600 text-gray-300 font-semibold py-3 px-6 rounded-lg transition-all duration-200 hover:border-gray-500 hover:text-white cursor-not-allowed opacity-60"
+            disabled
+          >
+            Continuar com E-mail
+          </button>
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-400">
+            Plataforma de automação jurídica com conformidade LGPD total
+          </p>
+          <div className="mt-4 text-xs text-gray-500">
+            Powered by <span className="text-[#00ADE8] font-medium">ness.</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-
-
-

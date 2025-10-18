@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # n.Oficios Frontend
+  # ============================================
+  oficios-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oficios-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}
+      - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID=${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.oficios.rule=Host(`oficio.ness.tec.br`)"
+      - "traefik.http.routers.oficios.entrypoints=websecure"
+      - "traefik.http.routers.oficios.tls=true"
+      - "traefik.http.routers.oficios.tls.certresolver=letsencrypt"
+      - "traefik.http.services.oficios.loadbalancer.server.port=3000"
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
+

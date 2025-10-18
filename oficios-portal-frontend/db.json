@@ -1,0 +1,67 @@
+{
+  "oficios": [
+    {
+      "id": "1",
+      "numero": "12345",
+      "processo": "1234567-89.2024.1.00.0000",
+      "autoridade": "Tribunal Regional Federal - 1ª Região",
+      "status": "ativo",
+      "prazo": "2024-10-19T23:59:59Z",
+      "descricao": "Requisição de informações processuais para instrução de processo administrativo",
+      "resposta": null,
+      "anexos": [],
+      "userId": "resper@ness.com.br",
+      "createdAt": "2024-10-15T10:00:00Z",
+      "updatedAt": "2024-10-15T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "numero": "12344",
+      "processo": "1234566-88.2024.1.00.0000",
+      "autoridade": "Superior Tribunal de Justiça",
+      "status": "ativo",
+      "prazo": "2024-10-22T23:59:59Z",
+      "descricao": "Solicitação de documentos relacionados ao processo",
+      "resposta": null,
+      "anexos": [],
+      "userId": "resper@ness.com.br",
+      "createdAt": "2024-10-14T09:00:00Z",
+      "updatedAt": "2024-10-14T09:00:00Z"
+    },
+    {
+      "id": "3",
+      "numero": "12343",
+      "processo": "1234565-87.2024.1.00.0000",
+      "autoridade": "Tribunal de Justiça do Estado de São Paulo",
+      "status": "vencido",
+      "prazo": "2024-10-16T23:59:59Z",
+      "descricao": "Pedido de esclarecimentos sobre sentença proferida",
+      "resposta": null,
+      "anexos": [],
+      "userId": "resper@ness.com.br",
+      "createdAt": "2024-10-10T14:00:00Z",
+      "updatedAt": "2024-10-10T14:00:00Z"
+    },
+    {
+      "id": "4",
+      "numero": "12342",
+      "processo": "1234564-86.2024.1.00.0000",
+      "autoridade": "Ministério Público Federal",
+      "status": "respondido",
+      "prazo": "2024-10-05T23:59:59Z",
+      "descricao": "Informações sobre andamento de investigação",
+      "resposta": "Informações prestadas conforme solicitado em 05/10/2024",
+      "anexos": ["resposta_12342.pdf"],
+      "userId": "resper@ness.com.br",
+      "createdAt": "2024-09-28T11:00:00Z",
+      "updatedAt": "2024-10-05T16:30:00Z"
+    }
+  ],
+  "stats": {
+    "ativos": 24,
+    "emRisco": 3,
+    "vencidos": 1,
+    "respondidos": 156
+  }
+}
+

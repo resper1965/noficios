@@ -1,237 +1,130 @@
-/**
- * Cliente HTTP seguro para comunicação com Cloud Functions.
- * Injeta JWT automaticamente e trata erros de autenticação.
- */
+// API Configuration and Services
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://southamerica-east1-PROJECT.cloudfunctions.net';
-
-export interface ApiError {
-  error: string;
-  message?: string;
-  required_roles?: string[];
+// Types
+export interface Oficio {
+  id: number | string;
+  numero: string;
+  processo: string;
+  autoridade: string;
+  status: 'ativo' | 'respondido' | 'vencido';
+  prazo: string;
+  descricao: string;
+  resposta?: string | null;
+  anexos?: string[];
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-/**
- * Cliente HTTP seguro com injeção automática de JWT.
- */
-export class ApiClient {
+export interface DashboardStats {
+  ativos: number;
+  emRisco: number;
+  vencidos: number;
+  respondidos: number;
+}
+
+export interface CreateOficioData {
+  numero: string;
+  processo: string;
+  autoridade: string;
+  prazo: string;
+  descricao: string;
+  userId: string;
+}
+
+// API Service Class
+class ApiService {
   private baseUrl: string;
-  private getToken: () => Promise<string | null>;
 
-  constructor(baseUrl: string, getToken: () => Promise<string | null>) {
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-    this.getToken = getToken;
   }
 
-  /**
-   * Requisição HTTP genérica com autenticação.
-   */
-  private async request<T>(
+  // Generic fetch wrapper
+  private async fetch<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options?: RequestInit
   ): Promise<T> {
-    const token = await this.getToken();
-
-    if (!token) {
-      // Redireciona para login se não houver token
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Não autenticado');
-    }
-
-    const url = `${this.baseUrl}/${endpoint}`;
-
-    const response = await fetch(url, {
-      ...options,
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
       headers: {
-        ...options.headers,
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        ...options?.headers,
       },
+      ...options,
     });
 
-    // Tratamento de erros de autenticação
-    if (response.status === 401) {
-      // Token inválido - redireciona para login
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('user_data');
-        window.location.href = '/login';
-      }
-      throw new Error('Sessão expirada. Faça login novamente.');
-    }
-
-    if (response.status === 403) {
-      // Sem permissão
-      const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || 'Acesso negado. Você não tem permissão para esta operação.');
-    }
-
     if (!response.ok) {
-      const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || `Erro ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     return response.json();
   }
 
-  /**
-   * GET request
-   */
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  // Oficios endpoints
+  async getOficios(userId?: string): Promise<Oficio[]> {
+    const url = userId ? `/oficios?userId=${userId}` : '/oficios';
+    return this.fetch<Oficio[]>(url);
   }
 
-  /**
-   * POST request
-   */
-  async post<T>(endpoint: string, data?: any): Promise<T> {
-    return this.request<T>(endpoint, {
+  async getOficio(id: number | string): Promise<Oficio> {
+    return this.fetch<Oficio>(`/oficios/${id}`);
+  }
+
+  async createOficio(data: CreateOficioData): Promise<Oficio> {
+    return this.fetch<Oficio>('/oficios', {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: JSON.stringify({
+        ...data,
+        status: 'ativo',
+        resposta: null,
+        anexos: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }),
     });
   }
 
-  /**
-   * PATCH request
-   */
-  async patch<T>(endpoint: string, data: any): Promise<T> {
-    return this.request<T>(endpoint, {
+  async updateOficio(id: number | string, data: Partial<Oficio>): Promise<Oficio> {
+    return this.fetch<Oficio>(`/oficios/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        updatedAt: new Date().toISOString(),
+      }),
     });
   }
 
-  /**
-   * DELETE request
-   */
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
-  }
-
-  /**
-   * Upload de arquivo (multipart/form-data)
-   */
-  async upload<T>(endpoint: string, formData: FormData): Promise<T> {
-    const token = await this.getToken();
-
-    if (!token) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Não autenticado');
-    }
-
-    const url = `${this.baseUrl}/${endpoint}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        // Não setar Content-Type para multipart/form-data (browser define automaticamente)
-      },
-      body: formData,
+  async deleteOficio(id: number | string): Promise<void> {
+    await this.fetch(`/oficios/${id}`, {
+      method: 'DELETE',
     });
+  }
 
-    if (response.status === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('user_data');
-        window.location.href = '/login';
-      }
-      throw new Error('Sessão expirada');
-    }
+  // Stats endpoint
+  async getStats(): Promise<DashboardStats> {
+    return this.fetch<DashboardStats>('/stats');
+  }
 
-    if (response.status === 403) {
-      const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || 'Acesso negado');
-    }
+  // Calculate real-time stats from oficios
+  calculateStats(oficios: Oficio[]): DashboardStats {
+    const now = new Date();
+    const oneDayMs = 24 * 60 * 60 * 1000;
 
-    if (!response.ok) {
-      const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || `Erro ${response.status}`);
-    }
-
-    return response.json();
+    return {
+      ativos: oficios.filter((o) => o.status === 'ativo').length,
+      emRisco: oficios.filter((o) => {
+        if (o.status !== 'ativo') return false;
+        const prazo = new Date(o.prazo);
+        const diff = prazo.getTime() - now.getTime();
+        return diff > 0 && diff < oneDayMs;
+      }).length,
+      vencidos: oficios.filter((o) => o.status === 'vencido').length,
+      respondidos: oficios.filter((o) => o.status === 'respondido').length,
+    };
   }
 }
 
-/**
- * Função helper para criar instância do ApiClient.
- * Deve ser usada dentro de componentes que têm acesso ao useAuth.
- */
-export function createApiClient(getToken: () => Promise<string | null>): ApiClient {
-  return new ApiClient(API_BASE_URL, getToken);
-}
-
-/**
- * Tipos TypeScript para as respostas da API
- */
-export interface Organization {
-  org_id: string;
-  name: string;
-  email_domains: string[];
-  admin_email: string;
-  notification_email?: string;
-  settings?: {
-    auto_process?: boolean;
-    require_compliance_approval?: boolean;
-    config_llm_model?: string;
-  };
-  billing?: {
-    llm_tokens_consumed?: number;
-    oficios_processed?: number;
-    storage_bytes?: number;
-    estimated_cost_usd?: number;
-  };
-  created_at?: string;
-  active?: boolean;
-}
-
-export interface Metrics {
-  org_id: string;
-  period: string;
-  kpis: {
-    total_oficios: number;
-    taxa_resposta: number;
-    sla_atingido_percent: number;
-    confianca_media_llm: number;
-    tempo_medio_processamento_seg: number;
-    taxa_atribuicao_percent: number;
-  };
-  por_status: Record<string, number>;
-  por_prioridade: Record<string, number>;
-  por_prompt_version: Record<string, number>;
-  billing: {
-    llm_tokens_consumed: number;
-    oficios_processed: number;
-    storage_bytes: number;
-    estimated_cost_usd: number;
-  };
-}
-
-export interface OficioData {
-  oficio_id: string;
-  org_id: string;
-  status: string;
-  assigned_user_id?: string;
-  dados_extraidos?: {
-    autoridade_nome: string;
-    processo_numero?: string;
-    solicitacoes: string[];
-    prazo_dias: number;
-    tipo_resposta_provavel: string;
-    confianca: number;
-    raw_text: string;
-    classificacao_intencao?: string;
-    elementos_necessarios_resposta?: string[];
-  };
-  data_limite?: string;
-  prioridade?: string;
-  confianca_extracao?: number;
-  llm_prompt_version?: string;
-}
-
-
-
-
+// Export singleton instance
+export const apiService = new ApiService(API_BASE_URL);
 

@@ -1,68 +1,63 @@
-# Dockerfile Multi-Stage para Next.js
-# Otimizado para Cloud Run
+# ============================================
+# Dockerfile - n.Oficios Production
+# ============================================
+
+FROM node:22-alpine AS base
 
 # ============================================
-# Etapa 1: Build (Dependencies + Build)
+# Stage 1: Dependencies
 # ============================================
-FROM node:18-alpine AS builder
-
-# Instala dependências necessárias
-RUN apk add --no-cache libc6-compat
-
+FROM base AS deps
 WORKDIR /app
 
-# Copia arquivos de dependências
+# Install dependencies
 COPY package.json package-lock.json* ./
-
-# Instala dependências
 RUN npm ci
 
-# Copia código fonte
+# ============================================
+# Stage 2: Builder
+# ============================================
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Configuração de ambiente para build
-ENV NEXT_TELEMETRY_DISABLED 1
+# Environment variables for build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-# Build da aplicação Next.js
+# Build Next.js
 RUN npm run build
 
 # ============================================
-# Etapa 2: Runtime (Production)
+# Stage 3: Runner
 # ============================================
-FROM node:18-alpine AS runner
-
+FROM base AS runner
 WORKDIR /app
 
-# Configuração de ambiente
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Cria usuário não-root para segurança
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Copia arquivos necessários do builder
+# Copy necessary files
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Define propriedade dos arquivos
-RUN chown -R nextjs:nodejs /app
-
-# Muda para usuário não-root
+# Switch to non-root user
 USER nextjs
 
-# Expõe porta (Cloud Run usa variável PORT)
+# Expose port
 EXPOSE 3000
 
-# Define variável de ambiente para porta
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Comando de inicialização
+# Start application
 CMD ["node", "server.js"]
-
-
-
-
 

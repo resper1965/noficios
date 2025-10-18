@@ -1,295 +1,215 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUserData } from '@/hooks/useAuth';
-import { createApiClient, type OficioData, type Metrics } from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-// Ícones removidos conforme diretriz de UI
-import PageHeader from '@/components/PageHeader';
-
-interface SlaIndicators {
-  total_ativos: number;
-  em_risco: number;
-  vencidos: number;
-}
+import { useAuth } from '@/hooks/useAuthSupabase';
+import { useOficios } from '@/hooks/useOficios';
+import { 
+  FileText, 
+  AlertTriangle, 
+  Clock, 
+  CheckCircle, 
+  LogOut,
+  User,
+  Settings,
+  Bell
+} from 'lucide-react';
 
 export default function DashboardPage() {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { oficios, stats, loading: oficiosLoading, error } = useOficios();
   const router = useRouter();
-  const { user, loading, getToken } = useAuth();
-  const userData = useUserData();
-  
-  const [slaIndicators, setSlaIndicators] = useState<SlaIndicators | null>(null);
-  const [oficios, setOficios] = useState<OficioData[]>([]);
-  const [filteredOficios, setFilteredOficios] = useState<OficioData[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loadingData, setLoadingData] = useState(true);
-  const [showOnlyMine, setShowOnlyMine] = useState(false);
-  const apiBase = (typeof window !== 'undefined' ? (window as any).__ENV?.NEXT_PUBLIC_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
-  const isApiConfigured = !!apiBase && !apiBase.includes('PROJECT');
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/login');
+    if (!authLoading && !user) {
+      router.push('/login');
     }
-  }, [loading, user, router]);
+  }, [user, authLoading, router]);
 
-  useEffect(() => {
-    if (userData?.org_id && isApiConfigured) {
-      loadDashboardData();
-    } else {
-      setLoadingData(false);
-    }
-  }, [userData, isApiConfigured]);
+  const loading = authLoading || oficiosLoading;
 
-  useEffect(() => {
-    // Filtra ofícios baseado na busca e filtro "meus ofícios"
-    let filtered = oficios;
-
-    if (showOnlyMine && userData?.uid) {
-      filtered = filtered.filter(o => o.assigned_user_id === userData.uid);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(o => 
-        o.dados_extraidos?.processo_numero?.toLowerCase().includes(term) ||
-        o.dados_extraidos?.autoridade_nome?.toLowerCase().includes(term)
-      );
-    }
-
-    setFilteredOficios(filtered);
-  }, [oficios, searchTerm, showOnlyMine, userData]);
-
-  const loadDashboardData = async () => {
-    if (!userData?.org_id) return;
-
-    setLoadingData(true);
-
-    try {
-      const apiClient = createApiClient(getToken);
-
-      // Busca métricas
-      const metricsData = await apiClient.get<any>(
-        `get_metrics?org_id=${userData.org_id}&period=30d`
-      );
-
-      // Calcula indicadores SLA
-      const metrics = metricsData.metrics as Metrics;
-      const porStatus = metrics.por_status;
-      
-      const totalAtivos = Object.entries(porStatus)
-        .filter(([status]) => status !== 'RESPONDIDO')
-        .reduce((sum, [, count]) => sum + count, 0);
-
-      // Mock dos indicadores (ajustar conforme API real)
-      setSlaIndicators({
-        total_ativos: totalAtivos,
-        em_risco: Math.floor(totalAtivos * 0.15), // ~15% em risco
-        vencidos: Math.floor(totalAtivos * 0.05)  // ~5% vencidos
-      });
-
-      // Busca ofícios (mock - substituir por endpoint real)
-      // const oficiosData = await apiClient.get<any>(`list_oficios?org_id=${userData.org_id}`);
-      // setOficios(oficiosData.oficios);
-      
-      // Mock temporário
-      setOficios([]);
-
-    } catch (error) {
-      console.error('Erro ao carregar dashboard:', error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
-  const calcularHorasRestantes = (dataLimite?: string): number => {
-    if (!dataLimite) return 999;
-    
-    const limite = new Date(dataLimite);
-    const agora = new Date();
-    const diff = limite.getTime() - agora.getTime();
-    
-    return diff / (1000 * 60 * 60); // Horas
-  };
-
-  const getUrgenciaColor = (horas: number, prioridade?: string) => {
-    if (horas < 0) return 'text-red-600 bg-red-50';
-    if (horas < 24) return 'text-orange-600 bg-orange-50';
-    if (horas < 48 && prioridade === 'ALTA') return 'text-yellow-600 bg-yellow-50';
-    return 'text-gray-600';
-  };
-
-  if (loading || !user) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Carregando...</p>
         </div>
       </div>
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="container mx-auto max-w-7xl py-8 px-4 font-sans">
-      {!isApiConfigured && (
-        <div className="mb-6 rounded-md border border-yellow-500/30 bg-yellow-500/10 text-yellow-100 p-3 text-sm">
-          Backend não configurado: defina NEXT_PUBLIC_API_BASE_URL para o projeto em produção.
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl font-bold text-white">
+                ness<span className="text-[#00ADE8]">.</span>
+              </div>
+              <div className="text-lg text-gray-300 font-medium">
+                oficios
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <button className="p-2 text-gray-400 hover:text-white transition-colors">
+              <Bell className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => router.push('/configuracoes')}
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+              title="Configurações"
+            >
+              <Settings className="h-5 w-5" />
+            </button>
+            <div className="flex items-center space-x-2">
+              <User className="h-5 w-5 text-gray-400" />
+              <span className="text-sm text-gray-300">{user.user_metadata?.full_name || user.email}</span>
+            </div>
+            <button
+              onClick={signOut}
+              className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sair</span>
+            </button>
+          </div>
         </div>
-      )}
-      <PageHeader
-        title="Dashboard"
-        subtitle="Monitoramento de ofícios e prazos em tempo real"
-      />
+      </header>
 
-      {/* Bento grid */}
-      <div className="grid grid-cols-1 md:grid-cols-6 auto-rows-fr gap-6 mb-8">
-        {/* Total Ativos */}
-        <Card className="bg-[#111317] text-[#EEF1F6] border-[#2a2f3a] md:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium tracking-tight text-muted-foreground">Ofícios Ativos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-semibold">{loadingData ? '...' : slaIndicators?.total_ativos || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Status não respondido</p>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
+          <p className="text-gray-400">
+            Bem-vindo, {user.user_metadata?.full_name || user.email}
+          </p>
+        </div>
 
-        {/* Em Risco (<24h) */}
-        <Card className="bg-[#111317] text-[#EEF1F6] border-[#2a2f3a] md:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium tracking-tight" style={{color:'#FFA94D'}}>Em Risco</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-semibold" style={{color:'#FFA94D'}}>{loadingData ? '...' : slaIndicators?.em_risco || 0}</div>
-            <p className="text-xs mt-1" style={{color:'#FFA94D'}}>Prazo &lt; 24 horas</p>
-          </CardContent>
-        </Card>
-
-        {/* Vencidos */}
-        <Card className="bg-[#111317] text-[#EEF1F6] border-[#2a2f3a] md:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium tracking-tight" style={{color:'#FF6B6B'}}>Vencidos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-semibold" style={{color:'#FF6B6B'}}>{loadingData ? '...' : slaIndicators?.vencidos || 0}</div>
-            <p className="text-xs mt-1" style={{color:'#FF6B6B'}}>Prazo ultrapassado</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabela de Ofícios */}
-      <Card className="bg-[#111317] text-[#EEF1F6] border-[#2a2f3a]">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="font-semibold tracking-tight">Ofícios Ativos</CardTitle>
-            <Button variant="outline" size="sm">Exportar</Button>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">Ofícios Ativos</p>
+                <p className="text-3xl font-bold text-white">{stats?.ativos || 0}</p>
+                <p className="text-sm text-gray-400">Em andamento</p>
+              </div>
+              <FileText className="h-8 w-8 text-blue-400" />
+            </div>
           </div>
 
-          {/* Filtros */}
-          <div className="flex gap-4 mt-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Buscar por processo ou autoridade..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className=""
-              />
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">Em Risco</p>
+                <p className="text-3xl font-bold text-red-400">{stats?.emRisco || 0}</p>
+                <p className="text-sm text-gray-400">Prazo &lt; 24h</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-400" />
             </div>
-
-            <Button variant={showOnlyMine ? 'default' : 'outline'} onClick={() => setShowOnlyMine(!showOnlyMine)}>
-              Atribuídos a Mim
-            </Button>
           </div>
-        </CardHeader>
 
-        <CardContent>
-          {loadingData ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Carregando ofícios...</p>
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">Vencidos</p>
+                <p className="text-3xl font-bold text-red-500">{stats?.vencidos || 0}</p>
+                <p className="text-sm text-gray-400">Urgente</p>
+              </div>
+              <Clock className="h-8 w-8 text-red-500" />
             </div>
-          ) : filteredOficios.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                {searchTerm || showOnlyMine
-                  ? 'Nenhum ofício encontrado com os filtros aplicados'
-                  : 'Nenhum ofício ativo no momento'}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-sm">ID</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">Processo</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">Autoridade</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">Prazo</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">Atribuído</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">Status</th>
-                    <th className="text-right py-3 px-4 font-medium text-sm">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOficios.map((oficio) => {
-                    const horasRestantes = calcularHorasRestantes(oficio.data_limite);
-                    const urgenciaClass = getUrgenciaColor(horasRestantes, oficio.prioridade);
+          </div>
 
-                    return (
-                      <tr key={oficio.oficio_id} className="border-b hover:bg-muted/50">
-                        <td className="py-3 px-4 text-sm font-mono">
-                          {oficio.oficio_id.slice(0, 8)}...
-                        </td>
-                        <td className="py-3 px-4 text-sm">
-                          {oficio.dados_extraidos?.processo_numero || 'N/A'}
-                        </td>
-                        <td className="py-3 px-4 text-sm">
-                          {oficio.dados_extraidos?.autoridade_nome || 'N/A'}
-                        </td>
-                        <td className={`py-3 px-4 text-sm ${urgenciaClass}`}>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            {horasRestantes < 0 
-                              ? `Vencido há ${Math.abs(horasRestantes).toFixed(0)}h`
-                              : `${horasRestantes.toFixed(0)}h restantes`
-                            }
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-sm">
-                          {oficio.assigned_user_id || 
-                            <span className="text-muted-foreground italic">Não atribuído</span>
-                          }
-                        </td>
-                        <td className="py-3 px-4 text-sm">
-                          <span className="px-2 py-1 rounded-full text-xs bg-muted">
-                            {oficio.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.push(`/revisao/${oficio.oficio_id}`)}
-                          >
-                            Revisar
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">Respondidos</p>
+                <p className="text-3xl font-bold text-green-400">{stats?.respondidos || 0}</p>
+                <p className="text-sm text-gray-400">Concluídos</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-400" />
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Oficios */}
+        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold">Ofícios Recentes</h3>
+            <button
+              onClick={() => router.push('/oficios')}
+              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+            >
+              Ver todos →
+            </button>
+          </div>
+          
+          {error && (
+            <div className="bg-red-900/20 border border-red-500 text-red-400 px-4 py-3 rounded mb-4">
+              Erro ao carregar ofícios: {error}
             </div>
           )}
-        </CardContent>
-      </Card>
+
+          {oficios.length === 0 && !loading && (
+            <p className="text-gray-400 text-center py-8">
+              Nenhum ofício cadastrado ainda
+            </p>
+          )}
+
+          <div className="space-y-4">
+            {oficios.slice(0, 5).map((oficio) => {
+              const prazoDate = new Date(oficio.prazo);
+              const now = new Date();
+              const diffMs = prazoDate.getTime() - now.getTime();
+              const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+              let prazoText = '';
+              let prazoColor = '';
+
+              if (oficio.status === 'vencido') {
+                const diasVencido = Math.abs(diffDays);
+                prazoText = diasVencido === 0 ? 'Venceu hoje' : `Vencido há ${diasVencido} dia${diasVencido > 1 ? 's' : ''}`;
+                prazoColor = 'text-red-400';
+              } else if (oficio.status === 'respondido') {
+                prazoText = 'Respondido';
+                prazoColor = 'text-green-400';
+              } else if (diffDays <= 1) {
+                prazoText = diffDays === 0 ? 'Vence hoje' : `${diffDays} dia restante`;
+                prazoColor = 'text-red-400';
+              } else if (diffDays <= 3) {
+                prazoText = `${diffDays} dias restantes`;
+                prazoColor = 'text-yellow-400';
+              } else {
+                prazoText = `${diffDays} dias restantes`;
+                prazoColor = 'text-green-400';
+              }
+
+              return (
+                <div key={oficio.id} className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700/70 transition-colors">
+                  <div>
+                    <p className="font-medium text-white">Ofício #{oficio.numero}</p>
+                    <p className="text-sm text-gray-400">Processo: {oficio.processo}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-white text-sm">{oficio.autoridade}</p>
+                    <p className={`text-sm ${prazoColor}`}>{prazoText}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
-
-
-
