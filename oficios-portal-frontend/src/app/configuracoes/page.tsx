@@ -11,7 +11,8 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Settings
+  Settings,
+  User
 } from 'lucide-react';
 
 export default function ConfiguracoesPage() {
