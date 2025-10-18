@@ -10,6 +10,7 @@ import { DocumentViewer } from '@/components/hitl/DocumentViewer';
 import { ExtractionResults } from '@/components/hitl/ExtractionResults';
 import { ComplianceReviewForm } from '@/components/hitl/ComplianceReviewForm';
 import { ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
+import { toastSuccess, toastError, toastPromise } from '@/lib/toast';
 
 interface OficioData {
   id: string;
@@ -110,8 +111,10 @@ export default function RevisaoPage() {
       setOficio(transformedData);
     } catch (error) {
       console.error('Erro ao carregar ofício:', error);
-      alert('Erro ao carregar ofício. Redirecionando...');
-      router.push('/dashboard');
+      toastError('Erro ao carregar ofício. Redirecionando...');
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 2000);
     } finally {
       setLoading(false);
     }
@@ -120,20 +123,20 @@ export default function RevisaoPage() {
   const handleSaveRascunho = async (data: Record<string, unknown>) => {
     console.log('Salvando rascunho:', data);
     
-    try {
-      const { apiClient } = await import('@/lib/api-client');
-      
-      await apiClient.adicionarContexto(oficioId, {
+    const { apiClient } = await import('@/lib/api-client');
+    
+    await toastPromise(
+      apiClient.adicionarContexto(oficioId, {
         dados_apoio: data.contexto as string,
         notas: data.notas as string,
         referencias: data.referencias as string[],
-      });
-      
-      alert('✅ Rascunho salvo com sucesso!');
-    } catch (error) {
-      console.error('Erro ao salvar rascunho:', error);
-      alert('❌ Erro ao salvar rascunho. Tente novamente.');
-    }
+      }),
+      {
+        loading: '💾 Salvando rascunho...',
+        success: '✅ Rascunho salvo com sucesso!',
+        error: '❌ Erro ao salvar. Tente novamente.',
+      }
+    );
   };
 
   const handleAprovar = async (data: Record<string, unknown>) => {
@@ -142,13 +145,20 @@ export default function RevisaoPage() {
     try {
       const { apiClient } = await import('@/lib/api-client');
       
-      // Aprovar via API Gateway → Backend Python W3
-      await apiClient.aprovarOficio(oficioId, {
-        dados_apoio: data.contexto as string,
-        notas: data.notas as string,
-        referencias: data.referencias as string[],
-        responsavel: data.responsavel as string,
-      });
+      // Aprovar via API Gateway → Backend Python W3 (com toast)
+      await toastPromise(
+        apiClient.aprovarOficio(oficioId, {
+          dados_apoio: data.contexto as string,
+          notas: data.notas as string,
+          referencias: data.referencias as string[],
+          responsavel: data.responsavel as string,
+        }),
+        {
+          loading: '⚡ Aprovando ofício...',
+          success: '✅ Ofício aprovado! A IA está gerando a resposta...',
+          error: '❌ Erro ao aprovar. Tente novamente.',
+        }
+      );
       
       console.log('✅ Ofício aprovado com sucesso');
       
@@ -161,7 +171,7 @@ export default function RevisaoPage() {
       }, 3000);
     } catch (error) {
       console.error('❌ Erro ao aprovar:', error);
-      alert('❌ Erro ao aprovar ofício. Tente novamente.');
+      // Toast já mostrou o erro
     }
   };
 
@@ -171,16 +181,25 @@ export default function RevisaoPage() {
     try {
       const { apiClient } = await import('@/lib/api-client');
       
-      // Rejeitar via API Gateway → Backend Python W3
-      await apiClient.rejeitarOficio(oficioId, motivo);
+      // Rejeitar via API Gateway → Backend Python W3 (com toast)
+      await toastPromise(
+        apiClient.rejeitarOficio(oficioId, motivo),
+        {
+          loading: '🗑️ Rejeitando ofício...',
+          success: '❌ Ofício rejeitado com sucesso',
+          error: '❌ Erro ao rejeitar. Tente novamente.',
+        }
+      );
       
       console.log('✅ Ofício rejeitado com sucesso');
       
-      alert('❌ Ofício rejeitado com sucesso.');
-      router.push('/dashboard');
+      // Aguardar 1 segundo para usuário ler o toast
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('❌ Erro ao rejeitar:', error);
-      alert('❌ Erro ao rejeitar ofício. Tente novamente.');
+      // Toast já mostrou o erro
     }
   };
 
