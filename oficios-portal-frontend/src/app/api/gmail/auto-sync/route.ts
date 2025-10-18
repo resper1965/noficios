@@ -1,28 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { withApiKeyAuth } from '@/middleware/auth';
+import { withRateLimit } from '@/middleware/rate-limit';
 
 // POST: Auto-sync emails from configured Gmail account
-export async function POST(request: NextRequest) {
+// Protected with API Key auth and rate limiting
+async function handleAutoSync(request: NextRequest) {
   try {
     const body = await request.json();
     const { email = 'resper@ness.com.br', label = 'INGEST' } = body;
 
     console.log(`📧 Auto-sincronização Gmail: ${email} | Label: ${label}`);
 
-    // TODO: Implementar integração com backend Python W0_gmail_ingest
-    // Por enquanto, retornar sucesso simulado
+    // GAP-003: Backend Python Integration
+    // Decision: Waived for MVP - Feature planned for v2
+    // See: docs/architecture/waivers/gap-003-gmail-sync.yml
     
+    // For now, acknowledge request and return accepted status
     const results = {
-      status: 'success',
+      status: 'accepted',
       email,
       label,
-      total: 0,
-      imported: 0,
-      needsReview: 0,
-      message: 'Sincronização configurada. Aguardando implementação do backend Python.'
+      message: 'Gmail sync feature is planned for v2. Request logged.',
+      version: 'v1.0-MVP',
+      plannedRelease: 'v2.0'
     };
 
-    return NextResponse.json(results, { status: 200 });
+    // Log for future implementation tracking
+    console.info('[GMAIL_SYNC] Sync request (waived feature)', {
+      email,
+      label,
+      timestamp: new Date().toISOString(),
+      note: 'Feature waived - see ADR-002'
+    });
+
+    return NextResponse.json(results, { status: 202 }); // 202 Accepted
   } catch (error) {
     console.error('❌ Erro na auto-sincronização:', error);
     return NextResponse.json(
@@ -32,7 +44,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Apply middleware: Rate limit (10 req/min) + API Key auth
+export const POST = withRateLimit(
+  withApiKeyAuth(handleAutoSync),
+  { max: 10, windowMs: 60000 }
+);
+
 // GET: Status da sincronização
+// Public endpoint (no auth required for status check)
 export async function GET() {
   try {
     const supabase = createClient(

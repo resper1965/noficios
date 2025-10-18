@@ -11,6 +11,19 @@ LABEL="INGEST"
 API_URL="http://62.72.8.164:3000/api/gmail/auto-sync"
 LOG_FILE="/var/log/gmail-sync.log"
 
+# GAP-001: API Key Authentication
+# Load API key from environment or config file
+if [ -f ~/.gmail-sync.conf ]; then
+  source ~/.gmail-sync.conf
+fi
+
+if [ -z "$GMAIL_SYNC_API_KEY" ]; then
+  echo "❌ ERROR: GMAIL_SYNC_API_KEY not set"
+  echo "Set it in ~/.gmail-sync.conf or environment"
+  echo "Example: export GMAIL_SYNC_API_KEY='your-key-here'"
+  exit 1
+fi
+
 # Cores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -31,6 +44,7 @@ echo "🔄 Iniciando sincronização..."
 
 response=$(curl -s -X POST "$API_URL" \
   -H "Content-Type: application/json" \
+  -H "x-api-key: $GMAIL_SYNC_API_KEY" \
   -d "{\"email\":\"$EMAIL\",\"label\":\"$LABEL\"}" \
   -w "\n%{http_code}")
 

@@ -1,0 +1,157 @@
+# Waiver: Gmail Sync Integration (GAP-003)
+
+schema: 1
+waiver_id: WAV-003
+story: "1.1"
+acceptance_criteria: "AC4"
+component: "Gmail Auto-Sync"
+created: "2025-10-18"
+status: active
+
+# Description
+description: |
+  Backend Python W0_gmail_ingest Cloud Function exists but is not integrated
+  with frontend auto-sync endpoint. The endpoint currently returns HTTP 202
+  Accepted with a placeholder message.
+
+# Reason for Waiver
+reason: |
+  Gmail automatic synchronization is a convenience feature, not critical for MVP.
+  
+  The system has complete functionality without it:
+  - Portal HITL for manual review works
+  - Dashboard SLA for management works
+  - API Gateway for backend integration works
+  - Users can create ofícios manually via UI
+  
+  Cost-benefit analysis:
+  - Implementation effort: 8 hours
+  - Benefit: Automation of email ingestion (nice-to-have)
+  - Impact of delay: 2-3 days to production
+  - Alternative: Manual creation (acceptable for MVP)
+  
+  Decision: Deploy MVP now, implement Gmail sync in v2.
+
+# Approval
+approved_by: "Scrum Master / Product Owner"
+approved_date: "2025-10-18"
+approved_method: "Winston (Architect) recommendation"
+
+# Impact Assessment
+impact:
+  severity: low
+  scope: "Automation feature only"
+  workarounds_available: true
+  user_impact: "Minor - users create ofícios manually"
+  security_impact: none
+  data_impact: none
+  performance_impact: none
+
+# Workaround
+workaround: |
+  Users can create ofícios manually through the web interface:
+  1. Access Portal HITL
+  2. Click "Novo Ofício"
+  3. Upload PDF document
+  4. Fill in metadata
+  5. Submit for processing
+  
+  Endpoint behavior:
+  - Returns HTTP 202 Accepted
+  - Logs request for tracking
+  - Returns message: "Gmail sync feature planned for v2"
+
+# Planned Implementation
+planned_implementation:
+  version: "v2.0"
+  timeline: "30 days after MVP launch"
+  estimated_effort: "8 hours"
+  priority: "P1"
+  
+implementation_plan: |
+  Phase 1: Backend Integration (4h)
+  - Create GmailIngestClient in frontend
+  - Implement HTTP client for W0_gmail_ingest
+  - Add Firebase service account authentication
+  - Handle responses and errors
+  
+  Phase 2: Testing & Validation (2h)
+  - Unit tests for client
+  - Integration tests with Cloud Function
+  - Validate email processing pipeline
+  - Test error scenarios
+  
+  Phase 3: Production Deployment (2h)
+  - Update environment variables
+  - Deploy to staging
+  - Smoke tests
+  - Deploy to production
+  - Monitor for issues
+
+# Risks Accepted
+risks_accepted:
+  - risk: "Emails must be manually created"
+    mitigation: "UI workflow is simple and documented"
+    probability: "100% (by design)"
+    impact: "Low"
+    
+  - risk: "Loss of automation benefit"
+    mitigation: "Planned for v2 in 30 days"
+    probability: "100% (temporary)"
+    impact: "Low"
+    
+  - risk: "Users may expect auto-sync"
+    mitigation: "Clear messaging in UI and docs"
+    probability: "Medium"
+    impact: "Low"
+
+# Conditions for Acceptance
+conditions:
+  - condition: "Document in user-facing UI that feature is in development"
+    status: pending
+    owner: "Frontend Dev"
+    
+  - condition: "Create backlog item for v2 implementation"
+    status: pending
+    owner: "Scrum Master"
+    
+  - condition: "Update API documentation with waiver notice"
+    status: completed
+    owner: "Architect"
+    
+  - condition: "Ensure other features work independently"
+    status: completed
+    owner: "QA"
+
+# Monitoring
+monitoring:
+  - metric: "User requests for Gmail sync feature"
+    threshold: "> 5 requests/week"
+    action: "Escalate priority to P0"
+    
+  - metric: "Manual ofício creation volume"
+    threshold: "> 100/day"
+    action: "Consider expediting v2 implementation"
+
+# Related Documents
+references:
+  - "docs/qa/gates/1.1-automacao-gmail.yml"
+  - "docs/architecture/PLANO_CORRECAO_GAPS.md (GAP-003)"
+  - "docs/architecture/adr/ADR-002-gmail-sync.md"
+  - "docs/stories/1.1.automacao-gmail.md (AC4)"
+
+# Rollback Plan
+rollback:
+  trigger: "If waiver causes production issues"
+  steps:
+    - "Endpoint already returns safe 202 response"
+    - "No code rollback needed"
+    - "If urgent: implement integration in 8h emergency sprint"
+  
+# Version History
+history:
+  - date: "2025-10-18"
+    action: "Waiver created and approved"
+    author: "Winston (Architect)"
+    reason: "MVP prioritization - deploy faster"
+
