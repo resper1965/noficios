@@ -50,7 +50,7 @@ export default function DashboardPage() {
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <ProductBrand product="oficios" size="sm" variant="light" inline />
+            <ProductBrand product="Oficios" size="sm" variant="light" />
           </div>
           
           <div className="flex items-center space-x-4">

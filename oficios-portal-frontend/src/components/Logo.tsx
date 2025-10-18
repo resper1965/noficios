@@ -66,7 +66,7 @@ export function BrandText({
 }
 
 export function ProductBrand({ 
-  product = 'oficios',
+  product = 'Oficios',
   size = 'md',
   variant = 'light',
   inline = false,
@@ -76,26 +76,11 @@ export function ProductBrand({
   inline?: boolean;
 } & Omit<LogoProps, 'showProduct' | 'productName'>) {
   const textColor = variant === 'light' ? 'text-white' : 'text-gray-900';
-  const productColor = variant === 'light' ? 'text-gray-300' : 'text-gray-600';
   
-  if (inline) {
-    return (
-      <span className={`${sizeClasses[size].brand} font-bold ${className}`}>
-        <span className={textColor}>n</span>
-        <span className="text-[#00ADE8]">.</span>
-        <span className={productColor}>{product}</span>
-      </span>
-    );
-  }
-  
+  // Formato: n.Produto (tudo inline)
   return (
-    <div className={`inline-flex flex-col ${className}`}>
-      <div className={`${sizeClasses[size].brand} font-bold ${textColor} leading-none`}>
-        ness<span className="text-[#00ADE8]">.</span>
-      </div>
-      <div className={`${sizeClasses[size].product} font-medium ${productColor} mt-1`}>
-        {product}
-      </div>
+    <div className={`${sizeClasses[size].brand} font-bold ${textColor} ${className}`}>
+      n<span className="text-[#00ADE8]">.</span>{product}
     </div>
   );
 }
