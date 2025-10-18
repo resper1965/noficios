@@ -7,15 +7,15 @@ echo "🔍 Verificando configuração OAuth..."
 
 # 1. Verificar variáveis de ambiente no VPS
 echo "1️⃣ Verificando variáveis de ambiente no VPS..."
-sshpass -p 'Gordinh@2009' ssh -o StrictHostKeyChecking=no root@oficio.ness.tec.br "cd /opt/oficios && cat .env | grep -E 'GOOGLE|SUPABASE'"
+sshpass -p '[SENHA_VPS]' ssh -o StrictHostKeyChecking=no root@oficio.ness.tec.br "cd /opt/oficios && cat .env | grep -E 'GOOGLE|SUPABASE'"
 
 # 2. Verificar logs do container
 echo "2️⃣ Verificando logs do container..."
-sshpass -p 'Gordinh@2009' ssh -o StrictHostKeyChecking=no root@oficio.ness.tec.br "cd /opt/oficios && docker compose logs oficios-frontend | grep -i oauth | tail -10"
+sshpass -p '[SENHA_VPS]' ssh -o StrictHostKeyChecking=no root@oficio.ness.tec.br "cd /opt/oficios && docker compose logs oficios-frontend | grep -i oauth | tail -10"
 
 # 3. Verificar status do container
 echo "3️⃣ Verificando status do container..."
-sshpass -p 'Gordinh@2009' ssh -o StrictHostKeyChecking=no root@oficio.ness.tec.br "cd /opt/oficios && docker compose ps"
+sshpass -p '[SENHA_VPS]' ssh -o StrictHostKeyChecking=no root@oficio.ness.tec.br "cd /opt/oficios && docker compose ps"
 
 echo "✅ Verificação concluída!"
 echo ""
