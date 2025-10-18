@@ -58,9 +58,18 @@ export class PythonBackendClient {
    * Get Firebase token from current user
    */
   private async getFirebaseToken(): Promise<string> {
-    // TODO: Implementar quando migrar para Firebase
-    // Por enquanto retorna token mock
-    return 'mock-token-for-development';
+    // Importar dinamicamente para evitar erro SSR
+    const { getFirebaseIdToken } = await import('./firebase-auth');
+    
+    const token = await getFirebaseIdToken();
+    
+    if (!token) {
+      // Fallback para desenvolvimento
+      console.warn('⚠️  Firebase token não disponível, usando mock');
+      return 'mock-token-for-development';
+    }
+    
+    return token;
   }
 
   /**
