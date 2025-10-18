@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { withApiKeyAuth } from '@/middleware/auth';
 import { withRateLimit } from '@/middleware/rate-limit';
+import { withValidation, schemas } from '@/middleware/validation';
+import { createRequestLogger } from '@/lib/logger';
 
 // POST: Auto-sync emails from configured Gmail account
-// Protected with API Key auth and rate limiting
-async function handleAutoSync(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { email = 'resper@ness.com.br', label = 'INGEST' } = body;
+// Protected with API Key auth, rate limiting, and input validation
+async function handleAutoSync(
+  request: NextRequest,
+  validated: { email: string; label: string }
+) {
+  const log = createRequestLogger(request);
+  const { email, label } = validated;
 
-    console.log(`📧 Auto-sincronização Gmail: ${email} | Label: ${label}`);
+  log.info('Gmail sync requested', { email, label });
 
     // GAP-003: Backend Python Integration
     // Decision: Waived for MVP - Feature planned for v2
@@ -44,10 +48,13 @@ async function handleAutoSync(request: NextRequest) {
   }
 }
 
-// Apply middleware: Rate limit (10 req/min) + API Key auth
-export const POST = withRateLimit(
-  withApiKeyAuth(handleAutoSync),
-  { max: 10, windowMs: 60000 }
+// Apply middleware chain: Validation → Rate limit → API Key auth
+export const POST = withValidation(
+  schemas.gmailSync,
+  withRateLimit(
+    withApiKeyAuth(handleAutoSync),
+    { max: 10, windowMs: 60000 }
+  )
 );
 
 // GET: Status da sincronização
