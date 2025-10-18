@@ -77,7 +77,46 @@ export class GmailService {
     };
   }
 
-  // Search for emails with "ofício" or "oficio" in subject
+  // Search for emails by label (default: INGEST)
+  async searchByLabel(labelName: string = 'INGEST', maxResults: number = 50): Promise<EmailMessage[]> {
+    try {
+      // Get label ID
+      const labelsResponse = await this.gmail.users.labels.list({ userId: 'me' });
+      const label = labelsResponse.data.labels?.find((l) => l.name === labelName);
+
+      if (!label?.id) {
+        console.warn(`Label "${labelName}" não encontrado`);
+        return [];
+      }
+
+      // Search for emails with the label
+      const response = await this.gmail.users.messages.list({
+        userId: 'me',
+        labelIds: [label.id],
+        maxResults,
+      });
+
+      const messages = response.data.messages || [];
+      const emailMessages: EmailMessage[] = [];
+
+      // Fetch full message details
+      for (const message of messages) {
+        if (!message.id) continue;
+
+        const fullMessage = await this.getMessageDetails(message.id);
+        if (fullMessage) {
+          emailMessages.push(fullMessage);
+        }
+      }
+
+      return emailMessages;
+    } catch (error) {
+      console.error('Error searching emails by label:', error);
+      throw error;
+    }
+  }
+
+  // Search for emails with "ofício" or "oficio" in subject (legacy method)
   async searchOficios(maxResults: number = 50): Promise<EmailMessage[]> {
     try {
       // Search for emails with "ofício" in subject

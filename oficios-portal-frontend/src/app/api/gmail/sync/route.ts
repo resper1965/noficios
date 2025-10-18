@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
       refreshToken,
     });
 
-    // Search for emails with ofícios
-    console.log('🔍 Buscando emails com ofícios...');
-    const emails = await gmailService.searchOficios(20);
-    console.log(`📧 Encontrados ${emails.length} emails`);
+    // Search for emails with label INGEST (regra automática do Gmail)
+    console.log('🔍 Buscando emails com marcador INGEST...');
+    const emails = await gmailService.searchByLabel('INGEST', 50);
+    console.log(`📧 Encontrados ${emails.length} emails no marcador INGEST`);
 
     const results = {
       total: emails.length,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Mark email as processed
-        await gmailService.addLabel(email.id, 'ness. oficios/Importado');
+        await gmailService.addLabel(email.id, 'n.Oficios/Processado');
         await gmailService.markAsRead(email.id);
 
         results.imported++;
