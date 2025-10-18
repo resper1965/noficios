@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuthSupabase';
 import { useOficios } from '@/hooks/useOficios';
+import { ProductBrand } from '@/components/Logo';
 import { 
   FileText, 
   AlertTriangle, 
@@ -49,14 +50,7 @@ export default function DashboardPage() {
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="text-2xl font-bold text-white">
-                ness<span className="text-[#00ADE8]">.</span>
-              </div>
-              <div className="text-lg text-gray-300 font-medium">
-                oficios
-              </div>
-            </div>
+            <ProductBrand product="oficios" size="sm" variant="light" inline />
           </div>
           
           <div className="flex items-center space-x-4">

@@ -6,8 +6,8 @@ import { AuthProvider } from "@/hooks/useAuthSupabase";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ness. oficios",
-  description: "Plataforma de automação jurídica",
+  title: "n.Oficios | ness.",
+  description: "Plataforma de automação jurídica com conformidade LGPD total",
 };
 
 export default function RootLayout({

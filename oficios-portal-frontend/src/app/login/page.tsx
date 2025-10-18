@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuthSupabase';
+import { ProductBrand } from '@/components/Logo';
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
@@ -30,12 +31,7 @@ export default function LoginPage() {
       <div className="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md border border-gray-700/50 shadow-2xl">
         <div className="text-center mb-8">
           <div className="mb-4">
-            <div className="text-6xl font-bold text-white mb-2">
-              ness<span className="text-[#00ADE8]">.</span>
-            </div>
-            <div className="text-xl text-gray-300 font-medium">
-              oficios
-            </div>
+            <ProductBrand product="oficios" size="lg" variant="light" />
           </div>
           <p className="text-gray-300 text-lg">
             Acesse sua conta para continuar
@@ -71,9 +67,6 @@ export default function LoginPage() {
           <p className="text-sm text-gray-400">
             Plataforma de automação jurídica com conformidade LGPD total
           </p>
-          <div className="mt-4 text-xs text-gray-500">
-            Powered by <span className="text-[#00ADE8] font-medium">ness.</span>
-          </div>
         </div>
       </div>
     </div>
