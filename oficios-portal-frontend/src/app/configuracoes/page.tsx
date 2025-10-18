@@ -18,6 +18,9 @@ export default function ConfiguracoesPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
+  const [gmailEmail, setGmailEmail] = useState('');
+  const [notificationEmail, setNotificationEmail] = useState('');
+  const [editingEmails, setEditingEmails] = useState(false);
   const [syncResult, setSyncResult] = useState<{
     total: number;
     imported: number;
@@ -105,17 +108,94 @@ export default function ConfiguracoesPage() {
       <main className="max-w-4xl mx-auto px-6 py-8">
         {/* User Info */}
         <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 rounded-lg border border-blue-700/30 p-6 mb-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <User className="h-6 w-6 text-blue-400" />
-            <h2 className="text-xl font-bold">Conta Conectada</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <User className="h-6 w-6 text-blue-400" />
+              <h2 className="text-xl font-bold">Configuração de Emails</h2>
+            </div>
+            <button
+              onClick={() => setEditingEmails(!editingEmails)}
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              {editingEmails ? 'Cancelar' : 'Editar'}
+            </button>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <p className="text-sm text-gray-400 mb-1">Email em uso:</p>
-              <p className="text-lg font-medium text-white">{user?.email}</p>
-              <p className="text-xs text-gray-500 mt-2">
-                Todos os ofícios serão vinculados a esta conta
-              </p>
+
+          <div className="space-y-4">
+            {/* Email de Login */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Email de Login (Autenticação)</p>
+              <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-3">
+                <p className="text-white font-medium">{user?.email}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Este email é usado para fazer login no sistema
+                </p>
+              </div>
+            </div>
+
+            {/* Email Gmail (Sincronização) */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Email Gmail (Recebimento de Ofícios)</p>
+              {editingEmails ? (
+                <div className="space-y-2">
+                  <input
+                    type="email"
+                    value={gmailEmail}
+                    onChange={(e) => setGmailEmail(e.target.value)}
+                    placeholder="exemplo@ness.com.br"
+                    className="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <p className="text-xs text-gray-400">
+                    Email da caixa postal onde os ofícios chegam
+                  </p>
+                  <button
+                    onClick={() => {
+                      // TODO: Salvar no Supabase user_config
+                      setEditingEmails(false);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-3">
+                  <p className="text-white font-medium">
+                    {gmailEmail || 'Não configurado'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Este é o email que será sincronizado (marcador INGEST)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Email de Notificações */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Email de Notificações (Alertas de Prazo)</p>
+              {editingEmails ? (
+                <div className="space-y-2">
+                  <input
+                    type="email"
+                    value={notificationEmail}
+                    onChange={(e) => setNotificationEmail(e.target.value)}
+                    placeholder={user?.email || ''}
+                    className="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <p className="text-xs text-gray-400">
+                    Email para receber alertas de prazos vencendo
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-3">
+                  <p className="text-white font-medium">
+                    {notificationEmail || user?.email}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Receberá alertas quando prazos estiverem próximos
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
