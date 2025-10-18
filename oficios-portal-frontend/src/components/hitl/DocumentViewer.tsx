@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, ZoomIn, ZoomOut, FileText } from 'lucide-react';
+import { Download, ZoomIn, ZoomOut, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+// Configurar worker do PDF.js
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface DocumentViewerProps {
   pdfUrl?: string;
@@ -11,7 +17,14 @@ interface DocumentViewerProps {
 
 export function DocumentViewer({ pdfUrl, ocrText, oficioNumero }: DocumentViewerProps) {
   const [viewMode, setViewMode] = useState<'pdf' | 'text'>('pdf');
-  const [zoom, setZoom] = useState(100);
+  const [zoom, setZoom] = useState(1.0);
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState(1);
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setPageNumber(1);
+  };
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 h-full flex flex-col">
@@ -25,22 +38,48 @@ export function DocumentViewer({ pdfUrl, ocrText, oficioNumero }: DocumentViewer
           
           <div className="flex items-center space-x-2">
             {/* Zoom Controls */}
-            {viewMode === 'pdf' && (
+            {viewMode === 'pdf' && pdfUrl && (
               <>
                 <button
-                  onClick={() => setZoom(Math.max(50, zoom - 25))}
+                  onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
                   className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                   title="Diminuir zoom"
                 >
                   <ZoomOut className="h-4 w-4 text-gray-300" />
                 </button>
-                <span className="text-sm text-gray-400 min-w-[50px] text-center">{zoom}%</span>
+                <span className="text-sm text-gray-400 min-w-[60px] text-center">{Math.round(zoom * 100)}%</span>
                 <button
-                  onClick={() => setZoom(Math.min(200, zoom + 25))}
+                  onClick={() => setZoom(Math.min(2.0, zoom + 0.25))}
                   className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                   title="Aumentar zoom"
                 >
                   <ZoomIn className="h-4 w-4 text-gray-300" />
+                </button>
+              </>
+            )}
+
+            {/* Page Navigation */}
+            {viewMode === 'pdf' && pdfUrl && numPages > 1 && (
+              <>
+                <div className="h-6 w-px bg-gray-600 mx-2"></div>
+                <button
+                  onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
+                  disabled={pageNumber === 1}
+                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Página anterior"
+                >
+                  <ChevronLeft className="h-4 w-4 text-gray-300" />
+                </button>
+                <span className="text-sm text-gray-400 min-w-[80px] text-center">
+                  Pág. {pageNumber} / {numPages}
+                </span>
+                <button
+                  onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
+                  disabled={pageNumber === numPages}
+                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Próxima página"
+                >
+                  <ChevronRight className="h-4 w-4 text-gray-300" />
                 </button>
               </>
             )}
@@ -88,14 +127,32 @@ export function DocumentViewer({ pdfUrl, ocrText, oficioNumero }: DocumentViewer
       <div className="flex-1 overflow-auto p-4">
         {viewMode === 'pdf' ? (
           pdfUrl ? (
-            <div className="flex items-center justify-center h-full">
-              {/* TODO: Integrar react-pdf ou iframe */}
-              <iframe
-                src={pdfUrl}
-                className="w-full h-full rounded-lg"
-                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-                title={`PDF Ofício ${oficioNumero}`}
-              />
+            <div className="flex items-center justify-center">
+              <Document
+                file={pdfUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading={
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                    <p className="text-gray-400">Carregando PDF...</p>
+                  </div>
+                }
+                error={
+                  <div className="flex flex-col items-center justify-center py-12 text-red-400">
+                    <FileText className="h-16 w-16 mb-4 opacity-50" />
+                    <p className="text-lg font-medium">Erro ao carregar PDF</p>
+                    <p className="text-sm text-gray-400 mt-2">Tente visualizar o texto OCR</p>
+                  </div>
+                }
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  scale={zoom}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  className="shadow-lg"
+                />
+              </Document>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
