@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
           oficio: data.oficio,
         });
       }
-    } catch (error) {
+    } catch {
       console.warn('Backend Python indisponível, tentando Supabase');
     }
 

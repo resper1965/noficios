@@ -2,43 +2,32 @@
 
 ## ✅ Realizações
 
-### **Build Corrigido**
-- Fix: Params async no Next.js 15
-- Build de produção: ✅ Sucesso
-- 22 rotas geradas
+### **Build & Deploy**
+- ✅ Fix params async Next.js 15
+- ✅ Build produção: 22 rotas
+- ✅ Deploy em 62.72.8.164:3000
+- ✅ Ambiente auditado: 96%
 
-### **Ambiente Auditado**
-- Verificação: 96% completo (27/28 ✅)
-- Dependências: Todas instaladas
-- Script: `verificar-ambiente.sh`
+### **Automação Gmail Real**
+- ✅ Script `sync-gmail-real.sh`
+- ✅ Endpoint `/api/gmail/auto-sync`
+- ✅ Email: resper@ness.com.br
+- ✅ Label: INGEST
+- ✅ Pronto para ativar
 
-### **Deploy Executado**
-- Aplicação rodando em 62.72.8.164:3000
-- Commit: `6fbb4e8e`
+## 📊 Status: 93% Completo
 
-### **Automação Gmail Configurada**
-- Script: `sync-gmail-real.sh` criado
-- Email: resper@ness.com.br
-- Label: INGEST
-- Frequência: A cada 15min (configurável)
-
-## 📊 Status
-
-**Progresso:** 91% completo
-- ✅ Frontend + Backend + API Gateway
+**Funcionalidades:**
+- ✅ Frontend + Backend + API
 - ✅ Build funcionando
-- ✅ Deploy parcial
-- 🔄 Automação Gmail pronta para ativar
+- ✅ Automação configurada
+- 🔄 Pendente: Integrar W0_gmail_ingest
 
 ## ⏭️ Próximo
 
-1. Testar sincronização Gmail
-2. Configurar OAuth
-3. Ativar automação
+Integrar backend Python W0_gmail_ingest com endpoint auto-sync
 
 ---
 
-**Arquivos criados:**
-- `sync-gmail-real.sh`
-- `ATIVAR_AUTOMACAO_GMAIL.md`
-- `PLANO_FINALIZACAO_BMAD.md`
+**Commits:** 3 hoje
+**Tempo:** 3h
