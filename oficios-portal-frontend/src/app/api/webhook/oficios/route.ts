@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 /**
  * API Gateway - Proxy para Backend Python W3
@@ -8,16 +7,19 @@ import { createClient } from '@supabase/supabase-js';
  * GET /api/webhook/oficios - Buscar ofício individual (deprecado, usar /get)
  */
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
-
 /**
  * POST - Webhook Update (Aprovar/Rejeitar/Adicionar Contexto)
  */
 export async function POST(request: NextRequest) {
   try {
+    // Import dinâmico
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY || 'placeholder'
+    );
+    
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
     
@@ -142,6 +144,13 @@ async function handleSupabaseFallback(
   body: any,
   user: any
 ): Promise<NextResponse> {
+  const { createClient } = await import('@supabase/supabase-js');
+  
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY || 'placeholder'
+  );
+  
   console.warn('⚠️  Backend Python indisponível, usando Supabase fallback');
 
   const { oficio_id, action } = body;
@@ -183,6 +192,13 @@ async function handleSupabaseFallback(
  * Sincronizar com Supabase após sucesso no backend Python
  */
 async function syncToSupabase(body: any, user: any): Promise<void> {
+  const { createClient } = await import('@supabase/supabase-js');
+  
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY || 'placeholder'
+  );
+  
   const { oficio_id, action } = body;
 
   let updateData: any = { updatedAt: new Date().toISOString() };

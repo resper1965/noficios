@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 /**
  * API Route: Sincronizar Supabase → Firebase
@@ -8,13 +7,16 @@ import { createClient } from '@supabase/supabase-js';
  * para permitir autenticação dupla (Supabase + Firebase)
  */
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY! // Service key (server-side only)
-);
-
 export async function POST(request: NextRequest) {
   try {
+    // Import dinâmico para evitar erro em build time
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY || 'placeholder'
+    );
+    
     // Obter token Supabase do header
     const authHeader = request.headers.get('authorization');
     

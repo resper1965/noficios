@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 /**
  * API Route: Buscar Ofício Individual
@@ -10,13 +9,16 @@ import { createClient } from '@supabase/supabase-js';
  * Retorna dados completos incluindo extração IA
  */
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
-
 export async function GET(request: NextRequest) {
   try {
+    // Import dinâmico
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY || 'placeholder'
+    );
+    
     const searchParams = request.nextUrl.searchParams;
     const oficioId = searchParams.get('oficio_id');
     const orgId = searchParams.get('org_id') || 'org_001';

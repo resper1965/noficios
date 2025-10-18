@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 /**
  * API Route: Listar Usuários
@@ -9,13 +8,16 @@ import { createClient } from '@supabase/supabase-js';
  * Retorna lista de usuários da organização para atribuição de ofícios
  */
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
-
 export async function GET(request: NextRequest) {
   try {
+    // Import dinâmico
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY || 'placeholder'
+    );
+    
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
     
