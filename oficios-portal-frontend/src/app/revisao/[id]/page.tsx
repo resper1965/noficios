@@ -81,34 +81,33 @@ export default function RevisaoPage() {
   const loadOficioData = async () => {
     setLoading(true);
     try {
-      // TODO: Buscar do backend Python via API Gateway
-      // Por enquanto, mock data para desenvolvimento
-      const mockData: OficioData = {
-        id: oficioId,
-        numero: '12345',
-        processo: '1234567-89.2024.1.00.0000',
-        autoridade: 'TRF 1ª Região',
-        prazo: '2024-10-25',
-        descricao: 'Requisição de informações processuais',
-        pdfUrl: 'https://via.placeholder.com/800x1200.pdf',
-        ocrText: 'TRIBUNAL REGIONAL FEDERAL DA 1ª REGIÃO\n\nOfício nº 12345\n\nProcesso: 1234567-89.2024.1.00.0000\n\nSenhor Diretor,\n\nSolicitamos, com fundamento no art. 5º da Lei 105/2001, informações detalhadas sobre...',
+      // Buscar do backend via API Gateway
+      const { apiClient } = await import('@/lib/api-client');
+      
+      const oficioData = await apiClient.getOficio(oficioId);
+      
+      // Transformar para formato do componente
+      const transformedData: OficioData = {
+        id: oficioData.oficio_id,
+        numero: oficioData.dados_extraidos?.numero_oficio || '',
+        processo: oficioData.dados_extraidos?.numero_processo || '',
+        autoridade: oficioData.dados_extraidos?.autoridade_emissora || '',
+        prazo: oficioData.dados_extraidos?.prazo_resposta || '',
+        descricao: oficioData.dados_extraidos?.classificacao_intencao || '',
+        pdfUrl: oficioData.anexos_urls?.[0],
+        ocrText: oficioData.conteudo_bruto,
         dados_ia: {
-          numero_oficio: '12345',
-          numero_processo: '1234567-89.2024.1.00.0000',
-          autoridade_emissora: 'TRF 1ª Região',
-          prazo_resposta: '2024-10-25',
-          classificacao_intencao: 'Requisição de Informações',
-          confianca_geral: 0.75,
-          confiancas_por_campo: {
-            numero_oficio: 0.82,
-            numero_processo: 0.75,
-            autoridade_emissora: 0.68,
-            prazo_resposta: 0.85,
-          },
+          numero_oficio: oficioData.dados_extraidos?.numero_oficio,
+          numero_processo: oficioData.dados_extraidos?.numero_processo,
+          autoridade_emissora: oficioData.dados_extraidos?.autoridade_emissora,
+          prazo_resposta: oficioData.dados_extraidos?.prazo_resposta,
+          classificacao_intencao: oficioData.dados_extraidos?.classificacao_intencao,
+          confianca_geral: oficioData.dados_extraidos?.confianca_geral || 0,
+          confiancas_por_campo: oficioData.dados_extraidos?.confiancas_por_campo || {},
         },
       };
 
-      setOficio(mockData);
+      setOficio(transformedData);
     } catch (error) {
       console.error('Erro ao carregar ofício:', error);
       alert('Erro ao carregar ofício. Redirecionando...');
@@ -120,17 +119,38 @@ export default function RevisaoPage() {
 
   const handleSaveRascunho = async (data: Record<string, unknown>) => {
     console.log('Salvando rascunho:', data);
-    // TODO: API call
-    alert('✅ Rascunho salvo com sucesso!');
+    
+    try {
+      const { apiClient } = await import('@/lib/api-client');
+      
+      await apiClient.adicionarContexto(oficioId, {
+        dados_apoio: data.contexto as string,
+        notas: data.notas as string,
+        referencias: data.referencias as string[],
+      });
+      
+      alert('✅ Rascunho salvo com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar rascunho:', error);
+      alert('❌ Erro ao salvar rascunho. Tente novamente.');
+    }
   };
 
   const handleAprovar = async (data: Record<string, unknown>) => {
     console.log('Aprovando ofício:', data);
     
     try {
-      // TODO: Chamar API Gateway -> Backend Python W3
-      // POST /api/webhook/oficios
-      // { action: 'approve_compliance', org_id, oficio_id, ... }
+      const { apiClient } = await import('@/lib/api-client');
+      
+      // Aprovar via API Gateway → Backend Python W3
+      await apiClient.aprovarOficio(oficioId, {
+        dados_apoio: data.contexto as string,
+        notas: data.notas as string,
+        referencias: data.referencias as string[],
+        responsavel: data.responsavel as string,
+      });
+      
+      console.log('✅ Ofício aprovado com sucesso');
       
       setCurrentStep(4);
       setShowSuccessModal(true);
@@ -140,7 +160,7 @@ export default function RevisaoPage() {
         router.push('/dashboard');
       }, 3000);
     } catch (error) {
-      console.error('Erro ao aprovar:', error);
+      console.error('❌ Erro ao aprovar:', error);
       alert('❌ Erro ao aprovar ofício. Tente novamente.');
     }
   };
@@ -149,13 +169,17 @@ export default function RevisaoPage() {
     console.log('Rejeitando ofício:', motivo);
     
     try {
-      // TODO: POST /api/webhook/oficios
-      // { action: 'reject_compliance', org_id, oficio_id, motivo }
+      const { apiClient } = await import('@/lib/api-client');
+      
+      // Rejeitar via API Gateway → Backend Python W3
+      await apiClient.rejeitarOficio(oficioId, motivo);
+      
+      console.log('✅ Ofício rejeitado com sucesso');
       
       alert('❌ Ofício rejeitado com sucesso.');
       router.push('/dashboard');
     } catch (error) {
-      console.error('Erro ao rejeitar:', error);
+      console.error('❌ Erro ao rejeitar:', error);
       alert('❌ Erro ao rejeitar ofício. Tente novamente.');
     }
   };
