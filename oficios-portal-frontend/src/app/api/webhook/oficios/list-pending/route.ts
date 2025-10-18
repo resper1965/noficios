@@ -64,7 +64,8 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       // Se backend Python não disponível, buscar do Supabase
-      console.warn('Backend Python indisponível, buscando do Supabase');
+      console.log('🔄 Backend Python indisponível, buscando do Supabase');
+      console.log('👤 User ID:', user.id);
       
       const { data: oficios, error: dbError } = await supabase
         .from('oficios')
@@ -73,8 +74,29 @@ export async function GET(request: NextRequest) {
         .eq('status', 'AGUARDANDO_COMPLIANCE')
         .order('createdAt', { ascending: false });
 
+      console.log('📊 Oficios encontrados:', oficios?.length || 0);
+      
       if (dbError) {
+        console.error('❌ Erro Supabase:', dbError);
         throw dbError;
+      }
+
+      // Debug: Se não encontrou, tentar sem filtro userId (temporário)
+      if (!oficios || oficios.length === 0) {
+        console.log('⚠️ Nenhum ofício com userId', user.id);
+        console.log('🔍 Buscando TODOS os ofícios AGUARDANDO_COMPLIANCE (debug)...');
+        
+        const { data: allOficios } = await supabase
+          .from('oficios')
+          .select('*')
+          .eq('status', 'AGUARDANDO_COMPLIANCE')
+          .order('createdAt', { ascending: false });
+        
+        console.log('📊 Total de ofícios aguardando (todos usuários):', allOficios?.length || 0);
+        
+        if (allOficios && allOficios.length > 0) {
+          console.log('🔧 userId nos ofícios:', allOficios.map(o => o.userId).join(', '));
+        }
       }
 
       return NextResponse.json({
