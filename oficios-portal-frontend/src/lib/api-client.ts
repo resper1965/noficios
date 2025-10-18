@@ -55,6 +55,7 @@ export interface OficioData {
     numero_processo?: string;
     autoridade_emissora?: string;
     prazo_resposta?: string;
+    classificacao_intencao?: string;
     confianca_geral?: number;
     confiancas_por_campo?: Record<string, number>;
   };

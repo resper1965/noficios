@@ -120,16 +120,26 @@ export default function RevisaoPage() {
     }
   };
 
-  const handleSaveRascunho = async (data: Record<string, unknown>) => {
+  const handleSaveRascunho = async (data: {
+    numero_oficio?: string;
+    numero_processo?: string;
+    autoridade_emissora?: string;
+    prazo_resposta?: string;
+    descricao?: string;
+    contexto?: string;
+    notas?: string;
+    referencias?: string[];
+    responsavel?: string;
+  }) => {
     console.log('Salvando rascunho:', data);
     
     const { apiClient } = await import('@/lib/api-client');
     
     await toastPromise(
       apiClient.adicionarContexto(oficioId, {
-        dados_apoio: data.contexto as string,
-        notas: data.notas as string,
-        referencias: data.referencias as string[],
+        dados_apoio: data.contexto,
+        notas: data.notas,
+        referencias: data.referencias,
       }),
       {
         loading: '💾 Salvando rascunho...',
@@ -139,7 +149,17 @@ export default function RevisaoPage() {
     );
   };
 
-  const handleAprovar = async (data: Record<string, unknown>) => {
+  const handleAprovar = async (data: {
+    numero_oficio?: string;
+    numero_processo?: string;
+    autoridade_emissora?: string;
+    prazo_resposta?: string;
+    descricao?: string;
+    contexto?: string;
+    notas?: string;
+    referencias?: string[];
+    responsavel?: string;
+  }) => {
     console.log('Aprovando ofício:', data);
     
     try {
@@ -148,10 +168,10 @@ export default function RevisaoPage() {
       // Aprovar via API Gateway → Backend Python W3 (com toast)
       await toastPromise(
         apiClient.aprovarOficio(oficioId, {
-          dados_apoio: data.contexto as string,
-          notas: data.notas as string,
-          referencias: data.referencias as string[],
-          responsavel: data.responsavel as string,
+          dados_apoio: data.contexto,
+          notas: data.notas,
+          referencias: data.referencias,
+          responsavel: data.responsavel,
         }),
         {
           loading: '⚡ Aprovando ofício...',
