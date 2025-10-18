@@ -32,7 +32,7 @@ export interface EmailAttachment {
 
 // Gmail Service Class
 export class GmailService {
-  private oauth2Client: OAuth2Client;
+  private oauth2Client: any; // OAuth2Client tem incompatibilidade de tipos entre versões
   private gmail: gmail_v1.Gmail;
 
   constructor(config: GmailConfig) {
