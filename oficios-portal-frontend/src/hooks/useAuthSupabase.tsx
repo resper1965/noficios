@@ -47,10 +47,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
+      // Forçar redirect para domínio de produção
+      const redirectUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:3000/dashboard'
+        : 'https://oficio.ness.tec.br/dashboard';
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: redirectUrl
         }
       });
       
@@ -83,11 +88,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUpWithEmail = async (email: string, password: string) => {
     try {
+      // Forçar redirect para domínio de produção
+      const redirectUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:3000/dashboard'
+        : 'https://oficio.ness.tec.br/dashboard';
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: redirectUrl
         }
       });
       
