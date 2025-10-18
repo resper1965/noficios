@@ -103,6 +103,23 @@ export default function ConfiguracoesPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-8">
+        {/* User Info */}
+        <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 rounded-lg border border-blue-700/30 p-6 mb-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <User className="h-6 w-6 text-blue-400" />
+            <h2 className="text-xl font-bold">Conta Conectada</h2>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <p className="text-sm text-gray-400 mb-1">Email em uso:</p>
+              <p className="text-lg font-medium text-white">{user?.email}</p>
+              <p className="text-xs text-gray-500 mt-2">
+                Todos os ofícios serão vinculados a esta conta
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Gmail Integration */}
         <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
           <div className="flex items-center space-x-3 mb-6">
@@ -110,8 +127,16 @@ export default function ConfiguracoesPage() {
             <h2 className="text-xl font-bold">Integração Gmail</h2>
           </div>
 
+          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mb-6">
+            <p className="text-sm text-blue-300 mb-2 font-medium">📧 Marcador INGEST</p>
+            <p className="text-xs text-gray-400">
+              Configure uma regra no Gmail para marcar emails de ofícios com o label <span className="font-mono bg-gray-700 px-2 py-0.5 rounded text-blue-300">INGEST</span>.
+              O sistema processará automaticamente esses emails ao sincronizar.
+            </p>
+          </div>
+
           <p className="text-gray-400 mb-6">
-            Conecte sua conta Gmail para importar ofícios automaticamente do email.
+            Conecte sua conta Gmail (<span className="text-white font-medium">{user?.email}</span>) para importar ofícios automaticamente.
           </p>
 
           {/* Connect Gmail Button */}
@@ -238,7 +263,7 @@ export default function ConfiguracoesPage() {
                 3
               </div>
               <p>
-                O sistema buscará emails com &quot;ofício&quot; no assunto e anexos em PDF.
+                Configure uma regra no Gmail para marcar emails de ofícios com o label <span className="font-mono bg-gray-700 px-1 rounded text-blue-300">INGEST</span>.
               </p>
             </div>
 
