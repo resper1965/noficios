@@ -1,0 +1,120 @@
+schema: 1
+story: '1.1'
+story_title: 'Automação Gmail INGEST'
+gate: CONCERNS
+status_reason: 'Implementação funcional mas com gaps críticos de segurança (endpoint sem auth) e integração backend Python incompleta (TODO não resolvido). Requer decisão de waiver ou completar antes de produção.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-10-18T15:40:00Z'
+
+top_issues:
+  - severity: high
+    category: security
+    description: 'Endpoint POST /api/gmail/auto-sync público sem autenticação ou rate limiting'
+    impact: 'Risco de abuse/DoS, acesso não autorizado a sincronização'
+    suggested_owner: dev
+    refs:
+      - 'oficios-portal-frontend/src/app/api/gmail/auto-sync/route.ts:5-33'
+    
+  - severity: high
+    category: integration
+    description: 'Backend Python W0_gmail_ingest não integrado (TODO na linha 12)'
+    impact: 'AC4 (processar anexos PDF) não funcional, feature core incompleta'
+    suggested_owner: dev
+    refs:
+      - 'oficios-portal-frontend/src/app/api/gmail/auto-sync/route.ts:12'
+      
+  - severity: medium
+    category: testing
+    description: 'Zero testes automatizados implementados'
+    impact: 'Sem garantia de qualidade, risco de regressão'
+    suggested_owner: dev
+    refs:
+      - 'docs/stories/1.1.automacao-gmail.md'
+
+  - severity: medium
+    category: operations
+    description: 'Logs sem rotação configurada, cron job não setupado'
+    impact: 'Disco pode encher, automação não ativa'
+    suggested_owner: dev
+    refs:
+      - 'sync-gmail-real.sh:12'
+
+waiver:
+  active: false
+  # Set to true if team accepts risks and deploys anyway
+  # reason: ''
+  # approved_by: ''
+  # date: ''
+
+quality_score: 65
+# Calculation: 100 - (20×0 FAILs) - (10×3.5 CONCERNS) = 65
+
+expires: '2025-11-01T23:59:59Z'
+
+evidence:
+  tests_reviewed: 0
+  tests_added: 0
+  risks_identified: 4
+  trace:
+    ac_covered: [1, 2, 5, 6]
+    ac_gaps: [3, 4]
+    # AC3: cron não configurado em prod
+    # AC4: backend não integrado
+
+nfr_validation:
+  security:
+    status: FAIL
+    notes: 'Endpoint público sem auth/rate limiting. Credenciais hardcoded em script.'
+  performance:
+    status: PASS
+    notes: 'Implementação eficiente, assíncrono correto.'
+  reliability:
+    status: CONCERNS
+    notes: 'Backend não integrado, sem retry logic, sem circuit breaker.'
+  maintainability:
+    status: PASS
+    notes: 'Código limpo, estrutura clara, documentação presente.'
+
+recommendations:
+  immediate: # Must fix before production
+    - action: 'Adicionar autenticação JWT ou API Key no endpoint'
+      priority: P0
+      effort: 2h
+      refs: ['oficios-portal-frontend/src/app/api/gmail/auto-sync/route.ts']
+      
+    - action: 'Implementar rate limiting (10 req/min por IP)'
+      priority: P0
+      effort: 1h
+      refs: ['oficios-portal-frontend/src/app/api/gmail/auto-sync/route.ts']
+      
+    - action: 'Implementar integração W0_gmail_ingest OU marcar AC4 como Future'
+      priority: P0
+      effort: 8h (implementar) OR 0h (waive)
+      refs: ['oficios-portal-frontend/src/app/api/gmail/auto-sync/route.ts:12']
+
+  future: # Can be addressed post-launch
+    - action: 'Adicionar testes unitários (endpoint + script)'
+      priority: P1
+      effort: 6h
+      refs: ['docs/stories/1.1.automacao-gmail.md']
+      
+    - action: 'Configurar log rotation (logrotate)'
+      priority: P2
+      effort: 1h
+      refs: ['sync-gmail-real.sh']
+      
+    - action: 'Setup cron job automatizado via Ansible/script'
+      priority: P2
+      effort: 2h
+      refs: ['sync-gmail-real.sh']
+      
+    - action: 'Implementar circuit breaker para backend Python'
+      priority: P2
+      effort: 4h
+      refs: ['oficios-portal-frontend/src/lib/python-backend.ts']
+
+technical_debt:
+  total_hours: 24
+  critical_hours: 11  # auth(2) + rate-limit(1) + integration(8)
+  estimated_interest: 'High - Security gaps podem bloquear certificação'
+
