@@ -39,17 +39,25 @@
 
 ### **Sprint 1: Integração Backend** (Continua)
 
-#### **Tarefa 1.2: Criar API Gateway Completo** 🔴 PRÓXIMA
-**Status:** Não iniciada  
-**Tempo estimado:** 6 horas  
-**Prioridade:** CRÍTICA
+#### ✅ **Tarefa 1.2: Criar API Gateway Completo** (CONCLUÍDA)
+**Status:** ✅ Implementada  
+**Tempo:** 4 horas  
+**Arquivos Criados:**
+- `src/app/api/webhook/oficios/list-pending/route.ts` - Lista pendentes
+- `src/app/api/webhook/oficios/get/route.ts` - Busca ofício individual
+- `src/app/api/webhook/oficios/route.ts` - Atualizado com validação
+- `src/lib/api-client.ts` - Cliente tipado
+- `API_GATEWAY.md` - Documentação completa
 
-**Ações necessárias:**
-- [ ] Endpoint `/api/webhook/oficios/list-pending`
-- [ ] Endpoint `/api/webhook/oficios/get`
-- [ ] Proxy para todos endpoints W3
-- [ ] Tratamento de erros robusto
-- [ ] Logs estruturados
+**Ações implementadas:**
+- [x] Endpoint `/api/webhook/oficios/list-pending`
+- [x] Endpoint `/api/webhook/oficios/get`
+- [x] Proxy para todos endpoints W3
+- [x] Tratamento de erros robusto
+- [x] Logs estruturados
+- [x] Fallback Supabase automático
+- [x] Sincronização Supabase após ações
+- [x] Cliente tipado para frontend
 
 ---
 
@@ -115,11 +123,11 @@
 
 | Sprint | Tarefas | Concluídas | Pendentes | % Completo |
 |--------|---------|------------|-----------|------------|
-| **Sprint 1** | 3 | 1 | 2 | 33% |
+| **Sprint 1** | 3 | 2 | 1 | 67% |
 | **Sprint 2** | 3 | 0 | 3 | 0% |
 | **Sprint 3** | 3 | 0 | 3 | 0% |
 | **Sprint 4** | 2 | 0 | 2 | 0% |
-| **TOTAL** | **11** | **1** | **10** | **9%** |
+| **TOTAL** | **11** | **2** | **9** | **18%** |
 
 ---
 
@@ -225,6 +233,8 @@ A aplicação estará **COMPLETA** quando:
 ## 🚀 **COMMITS REALIZADOS**
 
 1. ✅ `feat: autenticação cross-platform Supabase + Firebase` (Tarefa 1.1)
+2. ✅ `feat: API Gateway completo para backend Python` (Tarefa 1.2)
+3. ✅ `docs: documentação técnica do API Gateway`
 
 ---
 
