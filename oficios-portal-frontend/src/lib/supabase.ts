@@ -77,6 +77,24 @@ class SupabaseService {
     return data;
   }
 
+  // Busca full-text otimizada
+  async searchOficios(userId: string, searchTerm: string): Promise<Oficio[]> {
+    if (!searchTerm.trim()) {
+      return this.getOficios(userId);
+    }
+
+    // Busca em múltiplos campos usando OR
+    const { data, error } = await supabase
+      .from('oficios')
+      .select('*')
+      .eq('userId', userId)
+      .or(`numero.ilike.%${searchTerm}%,processo.ilike.%${searchTerm}%,autoridade.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%`)
+      .order('createdAt', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
   // Create oficio
   async createOficio(data: CreateOficioData): Promise<Oficio> {
     const { data: newOficio, error } = await supabase
