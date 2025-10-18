@@ -1,7 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, CheckCircle, XCircle, Plus, X, User } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface ReviewData {
   numero_oficio?: string;
@@ -45,6 +51,34 @@ export function ComplianceReviewForm({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState('');
   const [saving, setSaving] = useState(false);
+  const [usuarios, setUsuarios] = useState<Array<{ id: string; nome: string; email: string }>>([]);
+
+  // Carregar lista de usuários
+  useEffect(() => {
+    loadUsuarios();
+  }, []);
+
+  const loadUsuarios = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) return;
+
+      const response = await fetch('/api/usuarios', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsuarios(data.usuarios || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+    }
+  };
 
   const handleFieldChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -329,12 +363,15 @@ export function ComplianceReviewForm({
               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
               <option value="">Nenhum (sem atribuição)</option>
-              <option value="user1">João Silva</option>
-              <option value="user2">Maria Santos</option>
-              <option value="user3">Pedro Oliveira</option>
+              {usuarios.map((usuario) => (
+                <option key={usuario.id} value={usuario.id}>
+                  {usuario.nome} ({usuario.email})
+                </option>
+              ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
               💡 O responsável receberá alertas sobre prazos deste ofício
+              {usuarios.length === 0 && ' (Carregando usuários...)'}
             </p>
           </div>
         </div>
