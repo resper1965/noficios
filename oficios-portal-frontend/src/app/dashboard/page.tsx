@@ -87,6 +87,117 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        {/* HITL - Ofícios Aguardando Revisão */}
+        {/* TODO: Substituir por dados reais do backend Python */}
+        {false && ( // Habilitar quando integrado com backend
+          <div className="mb-8 bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 border border-yellow-700/50 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                  <AlertTriangle className="h-6 w-6 text-yellow-400" />
+                  <span>Ofícios Aguardando Sua Revisão</span>
+                </h3>
+                <p className="text-sm text-gray-400 mt-1">
+                  A IA extraiu dados de novos ofícios e precisa da sua aprovação
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-4xl font-bold text-yellow-400">3</p>
+                <p className="text-xs text-gray-400">para revisar</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {/* Card de Revisão 1 */}
+              <div 
+                onClick={() => router.push('/revisao/mock-1')}
+                className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-yellow-500 transition-all cursor-pointer group"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-400">Ofício</p>
+                    <p className="text-lg font-bold text-white">#12345</p>
+                  </div>
+                  <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg px-2 py-1">
+                    <p className="text-xs font-semibold text-yellow-400">72%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-300 mb-2">TRF 1ª Região</p>
+                <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                  Confiança baixa em 2 campos
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1 text-xs text-gray-400">
+                    <Clock className="h-3 w-3" />
+                    <span>5 dias</span>
+                  </div>
+                  <button className="text-sm font-medium text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                    REVISAR AGORA →
+                  </button>
+                </div>
+              </div>
+
+              {/* Card de Revisão 2 */}
+              <div 
+                onClick={() => router.push('/revisao/mock-2')}
+                className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-yellow-500 transition-all cursor-pointer group"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-400">Ofício</p>
+                    <p className="text-lg font-bold text-white">#12346</p>
+                  </div>
+                  <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg px-2 py-1">
+                    <p className="text-xs font-semibold text-yellow-400">68%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-300 mb-2">TCU</p>
+                <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                  Confiança baixa em 3 campos
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1 text-xs text-red-400">
+                    <Clock className="h-3 w-3" />
+                    <span>2 dias</span>
+                  </div>
+                  <button className="text-sm font-medium text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                    REVISAR AGORA →
+                  </button>
+                </div>
+              </div>
+
+              {/* Card de Revisão 3 */}
+              <div 
+                onClick={() => router.push('/revisao/mock-3')}
+                className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-yellow-500 transition-all cursor-pointer group"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-400">Ofício</p>
+                    <p className="text-lg font-bold text-white">#12347</p>
+                  </div>
+                  <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg px-2 py-1">
+                    <p className="text-xs font-semibold text-yellow-400">75%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-300 mb-2">MPF</p>
+                <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                  Confiança baixa em 1 campo
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1 text-xs text-gray-400">
+                    <Clock className="h-3 w-3" />
+                    <span>7 dias</span>
+                  </div>
+                  <button className="text-sm font-medium text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                    REVISAR AGORA →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
           {/* Stats Grid - Melhorado */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Card Ativos */}
