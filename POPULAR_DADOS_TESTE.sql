@@ -55,3 +55,6 @@ FROM oficios;
 
 -- 3. Verificar usuários
 SELECT id, email FROM auth.users LIMIT 5;
+
+
+

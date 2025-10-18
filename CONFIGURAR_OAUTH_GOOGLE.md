@@ -73,3 +73,6 @@ docker compose logs oficios-frontend | grep -i oauth
 - Teste com navegador incógnito
 
 **Configure os redirect URIs e o sistema deve funcionar!**
+
+
+

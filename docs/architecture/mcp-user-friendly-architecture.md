@@ -524,3 +524,6 @@ interface MCPError {
 - Gmail API response times
 - Database query performance
 - Error rates by type
+
+
+

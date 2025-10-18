@@ -53,3 +53,6 @@ echo ""
 echo "🔗 Links úteis:"
 echo "- Dashboard MCP: https://oficio.ness.tec.br/dashboard/mcp"
 echo "- Supabase SQL Editor: https://supabase.com/dashboard/project/ghcqywthubgfenqqxoqb/sql"
+
+
+

@@ -65,3 +65,6 @@ mcp gmail sync-ingest
 
 ## 🚀 **Próximo Passo**
 **Implementar MCP cliente para integração Gmail Google Workspace!**
+
+
+

@@ -86,3 +86,6 @@ SELECT
 WHERE NOT EXISTS (
   SELECT 1 FROM users WHERE email = 'admin@ness.tec.br'
 );
+
+
+

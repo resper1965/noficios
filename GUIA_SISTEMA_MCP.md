@@ -123,3 +123,6 @@ organizations (multitenancy)
 ## 🎉 **Sistema Pronto!**
 
 O sistema MCP user-friendly está implementado e pronto para uso. Os usuários podem executar a sincronização Gmail com um simples clique, e o sistema está preparado para futuras funcionalidades de RBAC e multitenancy.
+
+
+

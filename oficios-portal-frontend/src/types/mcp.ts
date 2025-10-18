@@ -67,3 +67,6 @@ export interface MCPJobStatus {
   completed_at?: string;
   error_message?: string;
 }
+
+
+

@@ -62,3 +62,6 @@ async function testAuth(supabase) {
     console.log('❌ Erro no teste:', error);
   }
 }
+
+
+

@@ -85,3 +85,6 @@ Siga o guia `CONFIGURAR_OAUTH_GOOGLE.md` para:
 - Teste com navegador incógnito
 
 **O sistema MCP está pronto para uso!**
+
+
+
