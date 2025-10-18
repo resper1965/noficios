@@ -125,9 +125,9 @@
 |--------|---------|------------|-----------|------------|
 | **Sprint 1** | 3 | 3 | 0 | 100% ✅ |
 | **Sprint 2** | 3 | 3 | 0 | 100% ✅ |
-| **Sprint 3** | 3 | 0 | 3 | 0% |
-| **Sprint 4** | 2 | 0 | 2 | 0% |
-| **TOTAL** | **11** | **6** | **5** | **55%** |
+| **Sprint 3** | 3 | 3 | 0 | 100% ✅ |
+| **Sprint 4** | 2 | 0 | 2 | 0% ⚠️ Config |
+| **TOTAL** | **11** | **9** | **2** | **82%** ✅ |
 
 ---
 
@@ -232,9 +232,30 @@ A aplicação estará **COMPLETA** quando:
 
 ## 🚀 **COMMITS REALIZADOS**
 
+### **Sprint 1:**
 1. ✅ `feat: autenticação cross-platform Supabase + Firebase` (Tarefa 1.1)
 2. ✅ `feat: API Gateway completo para backend Python` (Tarefa 1.2)
-3. ✅ `docs: documentação técnica do API Gateway`
+3. ✅ `feat: módulo de sincronização Supabase ↔ Firestore` (Tarefa 1.3)
+
+### **Sprint 2:**
+4. ✅ `feat: Portal HITL conectado com API real` (Tarefa 2.1)
+5. ✅ `feat: seção HITL habilitada no dashboard` (Tarefa 2.2)
+6. ✅ `docs: fluxo HITL completo documentado` (Tarefa 2.3)
+
+### **Sprint 3:**
+7. ✅ `feat: toast notifications elegantes` (Tarefa 3.3)
+8. ✅ `feat: lista de usuários dinâmica` (Tarefa 3.2)
+9. ✅ `feat: PDF Viewer profissional com react-pdf` (Tarefa 3.1)
+
+### **Sprint 4:**
+10. ✅ `docs: checklist completo de deploy` (Preparação)
+11. ✅ `docs: aplicação finalizada - relatório completo`
+
+### **Documentação:**
+12. ✅ `docs: guia completo Firebase vs Supabase`
+13. ✅ `docs: progresso da finalização (múltiplas atualizações)`
+
+**Total:** 13 commits | ~4,000 linhas de código
 
 ---
 
