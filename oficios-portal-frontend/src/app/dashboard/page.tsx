@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuthSupabase';
 import { useOficios } from '@/hooks/useOficios';
 import { ProductBrand } from '@/components/Logo';
+import { NotificationPanel } from '@/components/NotificationPanel';
 import { 
   FileText, 
   AlertTriangle, 
@@ -12,8 +13,7 @@ import {
   CheckCircle, 
   LogOut,
   User,
-  Settings,
-  Bell
+  Settings
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -54,9 +54,7 @@ export default function DashboardPage() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-gray-400 hover:text-white transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
+            <NotificationPanel />
             <button
               onClick={() => router.push('/configuracoes')}
               className="p-2 text-gray-400 hover:text-white transition-colors"
@@ -89,50 +87,62 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Stats Grid */}
+          {/* Stats Grid - Melhorado */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-400 mb-1">Ofícios Ativos</p>
-                <p className="text-3xl font-bold text-white">{stats?.ativos || 0}</p>
-                <p className="text-sm text-gray-400">Em andamento</p>
+          {/* Card Ativos */}
+          <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 p-6 rounded-xl border border-blue-700/30 hover:border-blue-600/50 transition-all cursor-pointer group" onClick={() => router.push('/oficios')}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                <FileText className="h-6 w-6 text-blue-400" />
               </div>
-              <FileText className="h-8 w-8 text-blue-400" />
+              <div className="text-right">
+                <p className="text-4xl font-bold text-white">{stats?.ativos || 0}</p>
+              </div>
             </div>
+            <p className="text-sm font-medium text-blue-400">Ofícios Ativos</p>
+            <p className="text-xs text-gray-400 mt-1">Em andamento</p>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-400 mb-1">Em Risco</p>
-                <p className="text-3xl font-bold text-red-400">{stats?.emRisco || 0}</p>
-                <p className="text-sm text-gray-400">Prazo &lt; 24h</p>
+          {/* Card Em Risco */}
+          <div className="bg-gradient-to-br from-orange-900/20 to-orange-800/10 p-6 rounded-xl border border-orange-700/30 hover:border-orange-600/50 transition-all cursor-pointer group" onClick={() => router.push('/oficios')}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-orange-500/10 rounded-lg group-hover:bg-orange-500/20 transition-colors">
+                <AlertTriangle className="h-6 w-6 text-orange-400" />
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-400" />
+              <div className="text-right">
+                <p className="text-4xl font-bold text-white">{stats?.emRisco || 0}</p>
+              </div>
             </div>
+            <p className="text-sm font-medium text-orange-400">Em Risco</p>
+            <p className="text-xs text-gray-400 mt-1">Vence em menos de 24h</p>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-400 mb-1">Vencidos</p>
-                <p className="text-3xl font-bold text-red-500">{stats?.vencidos || 0}</p>
-                <p className="text-sm text-gray-400">Urgente</p>
+          {/* Card Vencidos */}
+          <div className="bg-gradient-to-br from-red-900/20 to-red-800/10 p-6 rounded-xl border border-red-700/30 hover:border-red-600/50 transition-all cursor-pointer group" onClick={() => router.push('/oficios')}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-500/10 rounded-lg group-hover:bg-red-500/20 transition-colors animate-pulse">
+                <Clock className="h-6 w-6 text-red-500" />
               </div>
-              <Clock className="h-8 w-8 text-red-500" />
+              <div className="text-right">
+                <p className="text-4xl font-bold text-white">{stats?.vencidos || 0}</p>
+              </div>
             </div>
+            <p className="text-sm font-medium text-red-500">Vencidos</p>
+            <p className="text-xs text-gray-400 mt-1">Ação urgente necessária</p>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-400 mb-1">Respondidos</p>
-                <p className="text-3xl font-bold text-green-400">{stats?.respondidos || 0}</p>
-                <p className="text-sm text-gray-400">Concluídos</p>
+          {/* Card Respondidos */}
+          <div className="bg-gradient-to-br from-green-900/20 to-green-800/10 p-6 rounded-xl border border-green-700/30 hover:border-green-600/50 transition-all cursor-pointer group" onClick={() => router.push('/oficios')}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-500/10 rounded-lg group-hover:bg-green-500/20 transition-colors">
+                <CheckCircle className="h-6 w-6 text-green-400" />
               </div>
-              <CheckCircle className="h-8 w-8 text-green-400" />
+              <div className="text-right">
+                <p className="text-4xl font-bold text-white">{stats?.respondidos || 0}</p>
+              </div>
             </div>
+            <p className="text-sm font-medium text-green-400">Respondidos</p>
+            <p className="text-xs text-gray-400 mt-1">Concluídos com sucesso</p>
           </div>
         </div>
 
