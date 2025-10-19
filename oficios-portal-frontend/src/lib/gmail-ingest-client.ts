@@ -64,23 +64,23 @@ export class GmailIngestClient {
     const log = logger.child({ component: 'GmailIngestClient' });
 
     try {
-      // Build Gmail query
-      const query = this.buildGmailQuery(params);
-      
-      log.info('Calling W0_gmail_ingest', { 
+      log.info('Calling backend Python Gmail ingest', { 
         functionUrl: this.config.functionUrl,
-        query 
+        email: params.email,
+        label: params.label
       });
 
-      // Call Cloud Function
+      // Call backend Python API (VPS local)
       const response = await fetch(this.config.functionUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          // TODO: Add authentication when available
-          // 'Authorization': `Bearer ${await this.getIdToken()}`
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({
+          email: params.email,
+          label: params.label,
+          query: params.query
+        }),
         signal: AbortSignal.timeout(60000) // 60s timeout
       });
 

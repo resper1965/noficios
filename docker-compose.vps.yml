@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Backend Python - Gmail Integration & Processing
+  backend-python:
+    build:
+      context: ./backend-simple
+      dockerfile: Dockerfile
+    container_name: oficios-backend-python
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - EMAILS_DIR=/data/emails
+      - GMAIL_SA_JSON_FILE=/app/gmail-sa-key.json
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./gmail-sa-key.json:/app/gmail-sa-key.json:ro
+      - ./data/emails:/data/emails
+      - ./data/logs:/data/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - oficios-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./oficios-portal-frontend
+      dockerfile: Dockerfile
+    container_name: oficios-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - W0_GMAIL_INGEST_URL=http://backend-python:8000/gmail/ingest
+    env_file:
+      - ./oficios-portal-frontend/.env.production
+    depends_on:
+      backend-python:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - oficios-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  oficios-network:
+    driver: bridge
+
+volumes:
+  emails-data:
+  logs-data:
+
