@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { MCPExecutor } from '@/services/mcp/MCPExecutor';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 export async function GET(request: NextRequest) {
@@ -31,11 +30,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obter histórico de jobs
-    const executor = new MCPExecutor();
-    const jobs = await executor.getUserJobHistory(user.id, limit);
+    // TODO: Implementar histórico de jobs do Supabase
+    // Por enquanto, retornar array vazio
+    const jobs: any[] = [];
 
-    return NextResponse.json({ jobs });
+    return NextResponse.json({ jobs, message: 'Feature em desenvolvimento' });
   } catch (error) {
     console.error('Erro ao obter histórico de jobs:', error);
     return NextResponse.json(
