@@ -12,13 +12,16 @@ Autor: BMad Master
 Data: 2025-10-18
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import json
 import os
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -30,6 +33,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# Rate Limiting
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 # Configuração
 GMAIL_SA_FILE = os.getenv('GMAIL_SA_JSON_FILE', '/app/gmail-sa-key.json')
@@ -95,7 +106,50 @@ def health():
     }), 200
 
 
+def validate_email(email: str) -> str:
+    """Validate email format"""
+    if not email:
+        abort(400, description='Email is required')
+    
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(pattern, email):
+        abort(400, description='Invalid email format')
+    
+    return email.lower()
+
+
+def validate_label(label: str) -> str:
+    """Validate Gmail label"""
+    if not label:
+        abort(400, description='Label is required')
+    
+    if len(label) > 50:
+        abort(400, description='Label too long (max 50 characters)')
+    
+    if not re.match(r'^[A-Z_]+$', label):
+        abort(400, description='Label must be uppercase letters and underscores only')
+    
+    return label
+
+
+def sanitize_log_data(data: dict) -> dict:
+    """Remove sensitive data from logs"""
+    sensitive_keys = ['password', 'token', 'secret', 'key', 'credential', 'auth']
+    sanitized = {}
+    
+    for key, value in data.items():
+        if any(s in key.lower() for s in sensitive_keys):
+            sanitized[key] = '[REDACTED]'
+        elif isinstance(value, dict):
+            sanitized[key] = sanitize_log_data(value)
+        else:
+            sanitized[key] = value
+    
+    return sanitized
+
+
 @app.route('/gmail/ingest', methods=['POST'])
+@limiter.limit("10 per minute")
 def gmail_ingest():
     """
     Processar emails do Gmail com label INGEST
@@ -118,11 +172,15 @@ def gmail_ingest():
     """
     try:
         data = request.get_json() or {}
-        email = data.get('email', 'resper@ness.com.br')
-        label = data.get('label', 'INGEST')
+        
+        # Validate inputs
+        email = validate_email(data.get('email', 'resper@ness.com.br'))
+        label = validate_label(data.get('label', 'INGEST'))
         custom_query = data.get('query')
         
-        logger.info(f'Gmail ingest started: {email}, label: {label}')
+        # Sanitize log data
+        log_data = sanitize_log_data({'email': email, 'label': label})
+        logger.info(f'Gmail ingest started', extra=log_data)
         
         # Criar serviço Gmail
         gmail = create_gmail_service(email)
