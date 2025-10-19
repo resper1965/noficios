@@ -14,9 +14,10 @@ O **n.Oficios** é um sistema inteligente que automatiza o processamento de ofí
 
 - ✅ Importação automática de ofícios do Gmail
 - ✅ Extração inteligente de dados com IA
-- ✅ Portal de revisão humana guiada
+- ✅ Portal de revisão humana guiada (HITL)
 - ✅ Dashboard de acompanhamento SLA
 - ✅ Geração automática de respostas
+- ✅ **Sistema de ajuda integrado (NOVO!)**
 
 ---
 
@@ -574,6 +575,45 @@ Na lista de ofícios, use o campo de busca:
 
 ---
 
+## 🆘 Sistema de Ajuda Integrado
+
+### **Ajuda Sempre Disponível**
+
+O n.Oficios tem **help automático** integrado em todas as telas:
+
+**1. Ícone de Ajuda (?)**
+- Ao lado de cada campo/funcionalidade
+- **Hover:** mostra tooltip explicativo
+- **Click:** abre modal com detalhes completos
+
+**2. Botão Flutuante de Ajuda**
+- Canto inferior direito (azul)
+- Abre painel lateral com:
+  - Busca inteligente
+  - Ajuda contextual da página atual
+  - Links rápidos (manual, guia, suporte)
+  - Categorias organizadas
+
+**3. Central de Busca**
+- Digite sua dúvida
+- Resultados instantâneos
+- Exemplos práticos
+- Dicas e atalhos
+
+**Como usar:**
+```
+Exemplo 1: Dúvida em campo
+  → Clique no ícone (?) ao lado
+  → Veja explicação + exemplos
+
+Exemplo 2: Dúvida geral
+  → Clique botão azul flutuante
+  → Digite sua dúvida
+  → Veja todos resultados relacionados
+```
+
+---
+
 ## 🆘 Solução de Problemas
 
 ### **"Não consigo fazer login"**
@@ -582,7 +622,8 @@ Na lista de ofícios, use o campo de busca:
 1. Verifique sua conexão com internet
 2. Tente outro navegador
 3. Limpe cache do navegador
-4. Entre em contato com suporte
+4. Clique no botão de ajuda (?) para mais detalhes
+5. Entre em contato com suporte
 
 ---
 
@@ -713,6 +754,33 @@ Na lista de ofícios, use o campo de busca:
 - ✅ Não deletamos emails
 - ✅ Não enviamos emails
 - ✅ Apenas lemos com label INGEST
+
+---
+
+## 💡 Recursos de Ajuda
+
+### **Help Automático:**
+
+**22 tópicos de ajuda disponíveis:**
+- Dashboard e Cards SLA
+- Wizard HITL (4 passos)
+- Gmail (integração, labels, troubleshooting)
+- Upload de PDFs
+- Configurações
+- Atalhos de teclado
+
+**Como acessar:**
+1. **Ícone (?)** ao lado de cada elemento
+2. **Botão azul flutuante** (canto inferior direito)
+3. **Busca inteligente** por palavra-chave
+4. **Atalho:** Pressione `?` em qualquer tela
+
+**Cada tópico inclui:**
+- Explicação clara
+- Exemplos práticos
+- Dicas úteis
+- Atalhos de teclado
+- Links relacionados
 
 ---
 
