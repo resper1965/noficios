@@ -1,11 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { MCPExecutor } from '@/services/mcp/MCPExecutor';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,34 +12,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obter usuário autenticado
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Token de autenticação necessário' },
-        { status: 401 }
-      );
-    }
+    // TODO: Feature MCP será implementada em v2.0
+    // Por enquanto, retornar accepted
+    return NextResponse.json({ 
+      status: 'accepted',
+      message: 'MCP feature em desenvolvimento',
+      jobId: crypto.randomUUID()
+    }, { status: 202 });
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Usuário não autenticado' },
-        { status: 401 }
-      );
-    }
-
-    // Executar MCP
-    const executor = new MCPExecutor();
-    const result = await executor.executeJob(user.id, {
-      gmail_account,
-      label,
-      max_emails
-    });
-
-    return NextResponse.json(result);
   } catch (error) {
     console.error('Erro na execução MCP:', error);
     return NextResponse.json(
