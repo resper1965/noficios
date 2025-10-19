@@ -24,8 +24,9 @@ O **n.Oficios** é um sistema inteligente que automatiza o processamento de ofí
 
 ### **1. Acessar o Sistema**
 
-**URL:** http://62.72.8.164:3000  
-(ou https://oficio.ness.tec.br quando configurado)
+**URL:** https://oficio.ness.tec.br
+
+**Ambiente de desenvolvimento:** https://oficio-dev.ness.tec.br
 
 ### **2. Fazer Login**
 
@@ -79,11 +80,13 @@ Ao fazer login, você verá:
 
 **Configuração única:**
 
-1. Acesse **Configurações** (ícone ⚙️ no menu)
-2. Seção "Gmail Integration"
-3. Clique em **"Conectar Gmail"**
-4. Autorize o acesso
-5. Pronto! Sistema vai buscar emails automaticamente
+1. Acesse **Configurações** (ícone ⚙️ no menu superior)
+2. Localize a seção **"Integração com Gmail"**
+3. Clique no botão **"Conectar Gmail"**
+4. Faça login com sua conta Google
+5. Autorize o acesso à leitura de emails
+6. Aguarde confirmação de conexão bem-sucedida
+7. Pronto! O sistema buscará emails automaticamente a cada 15 minutos
 
 **Como funciona:**
 - Sistema busca emails com label **INGEST**
@@ -327,17 +330,21 @@ Na lista de ofícios, use o campo de busca:
 
 **INGEST** = Ingestão (entrada de dados)
 
-**Para usar:**
-1. No Gmail, abra o email
-2. Clique em mais opções (⋮)
-3. **"Aplicar rótulo"** ou **"Label"**
-4. Selecione **INGEST**
-5. Pronto!
+**Como aplicar a label:**
 
-**Dica:** Crie regra automática no Gmail:
-- Filtro: emails de tribunais
-- Ação automática: aplicar label INGEST
-- Tudo fica 100% automatizado!
+1. No Gmail, abra o email com o ofício
+2. Clique no ícone de rótulos (🏷️) ou em mais opções (⋮)
+3. Selecione **"Aplicar rótulo"** (ou **"Label"** em inglês)
+4. Escolha **INGEST** da lista
+5. Confirme
+
+**Criar label (primeira vez):**
+- Se INGEST não existir, clique em **"Criar novo"**
+- Digite: `INGEST`
+- Escolha cor (sugestão: azul)
+- Salvar
+
+**💡 Dica Pro:** Configure regra automática no Gmail para aplicar INGEST automaticamente em emails de tribunais. Veja o Tutorial 3 abaixo para instruções detalhadas.
 
 ---
 
