@@ -8,7 +8,7 @@ set -e
 # Configuração
 EMAIL="resper@ness.com.br"
 LABEL="INGEST"
-API_URL="http://62.72.8.164:3000/api/gmail/auto-sync"
+API_URL="https://oficio.ness.tec.br/api/gmail/auto-sync"
 LOG_FILE="/var/log/gmail-sync.log"
 
 # GAP-001: API Key Authentication

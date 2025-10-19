@@ -440,8 +440,8 @@ Na lista de ofícios, use o campo de busca:
    - Sistema processa automaticamente
 
 4. **Acessar Dashboard**
-   - Login: http://62.72.8.164:3000
-   - Ver ofício em "Aguardando Revisão"
+   - Acesse: https://oficio.ness.tec.br
+   - Veja ofício em "Aguardando Revisão"
 
 5. **Revisar no HITL**
    - Clicar em **"Revisar"**
