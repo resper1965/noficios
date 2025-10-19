@@ -4,6 +4,7 @@ import { withApiKeyAuth } from '@/middleware/auth';
 import { withRateLimit } from '@/middleware/rate-limit';
 import { withValidation, schemas } from '@/middleware/validation';
 import { createRequestLogger } from '@/lib/logger';
+import { createGmailIngestClient } from '@/lib/gmail-ingest-client';
 
 // POST: Auto-sync emails from configured Gmail account
 // Protected with API Key auth, rate limiting, and input validation
@@ -15,30 +16,60 @@ async function handleAutoSync(
     const log = createRequestLogger(request);
     const { email, label } = validated;
 
-    log.info('Gmail sync requested', { email, label });
+    log.info('Gmail sync started', { email, label });
 
-    // GAP-003: Backend Python Integration
-    // Decision: Waived for MVP - Feature planned for v2
-    // See: docs/architecture/waivers/gap-003-gmail-sync.yml
+    // IMPLEMENTAÇÃO REAL: Integrar com W0_gmail_ingest Cloud Function
+    let gmailResult;
     
-    // For now, acknowledge request and return accepted status
+    try {
+      // Call W0_gmail_ingest Cloud Function
+      const gmailClient = createGmailIngestClient();
+      gmailResult = await gmailClient.syncEmails({ email, label });
+      
+      log.info('W0_gmail_ingest completed', {
+        scanned: gmailResult.scanned,
+        bucket: gmailResult.bucket
+      });
+    } catch (error) {
+      // If Cloud Function is not available, log and continue
+      log.warn('W0_gmail_ingest not available', {
+        error: error instanceof Error ? error.message : String(error),
+        note: 'Check W0_GMAIL_INGEST_URL environment variable'
+      });
+      
+      // Return informative response
+      return NextResponse.json({
+        status: 'degraded',
+        message: 'Gmail ingest backend not configured',
+        email,
+        label,
+        note: 'Configure W0_GMAIL_INGEST_URL to enable Gmail sync',
+        scanned: 0
+      }, { status: 503 });
+    }
+
+    // Process results and sync to Supabase
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    );
+
+    // TODO: Parse GCS attachments and create ofícios in Supabase
+    // This will be implemented in W1_processamento_async integration
+    
     const results = {
-      status: 'accepted',
+      status: 'success',
       email,
       label,
-      message: 'Gmail sync feature is planned for v2. Request logged.',
-      version: 'v1.0-MVP',
-      plannedRelease: 'v2.0'
+      scanned: gmailResult.scanned,
+      bucket: gmailResult.bucket,
+      query: gmailResult.query,
+      message: `Successfully scanned ${gmailResult.scanned} emails from Gmail`
     };
 
-    // Log for future implementation tracking
-    log.info('[GMAIL_SYNC] Sync request (waived feature)', {
-      email,
-      label,
-      note: 'Feature waived - see ADR-002'
-    });
+    log.info('Gmail sync completed', results);
 
-    return NextResponse.json(results, { status: 202 }); // 202 Accepted
+    return NextResponse.json(results, { status: 200 });
   } catch (error) {
     const log = createRequestLogger(request);
     log.error('Auto-sincronização failed', error instanceof Error ? error : new Error(String(error)));
