@@ -93,7 +93,7 @@ networks:
     name: oficios-network
   traefik-network:
     external: true
-    name: traefik-network
+    name: traefik-public
 
 volumes:
   emails-data:
