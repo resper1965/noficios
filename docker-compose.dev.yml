@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Local Development
+  postgres:
+    image: postgres:16-alpine
+    container_name: oficios-db-dev
+    environment:
+      POSTGRES_USER: oficios
+      POSTGRES_PASSWORD: dev_password_2024
+      POSTGRES_DB: oficios_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oficios -d oficios_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - oficios-dev
+
+  # Backend Python
+  backend:
+    build:
+      context: ./backend-simple
+      dockerfile: Dockerfile
+    container_name: oficios-backend-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=postgresql://oficios:dev_password_2024@postgres:5432/oficios_db
+      - EMAILS_DIR=/data/emails
+      - GMAIL_SA_JSON_FILE=/app/gmail-sa-key.json
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data/emails:/data/emails
+      - ./data/logs:/data/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - oficios-dev
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PgAdmin (Opcional - UI para gerenciar PostgreSQL)
+  pgadmin:
+    image: dpage/pgadmin4:8.13
+    container_name: oficios-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@oficios.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - oficios-dev
+    profiles:
+      - tools  # Só sobe se rodar: docker compose --profile tools up
+
+networks:
+  oficios-dev:
+    driver: bridge
+    name: oficios-dev
+
+volumes:
+  postgres-dev-data:
+    name: oficios-postgres-dev
+  pgadmin-data:
+    name: oficios-pgadmin
+

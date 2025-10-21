@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/hooks/useAuthSupabase";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,23 +22,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className="dark">
-      <body className={`${inter.className} ${montserrat.variable}`}>
-        <AuthProvider>
+    <ClerkProvider>
+      <html lang="pt-BR" className="dark">
+        <body className={`${inter.className} ${montserrat.variable}`}>
           {children}
-        </AuthProvider>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#1f2937',
-              color: '#fff',
-              border: '1px solid #374151',
-            },
-          }}
-        />
-      </body>
-    </html>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#1f2937',
+                color: '#fff',
+                border: '1px solid #374151',
+              },
+            }}
+          />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
