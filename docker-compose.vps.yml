@@ -7,8 +7,8 @@ services:
       context: ./backend-simple
       dockerfile: Dockerfile
     container_name: oficios-backend-python
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - PORT=8000
       - EMAILS_DIR=/data/emails
@@ -19,14 +19,22 @@ services:
       - ./data/emails:/data/emails
       - ./data/logs:/data/logs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 40s
     restart: unless-stopped
     networks:
       - oficios-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.backend.rule=Host(`api.oficio.ness.tec.br`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
     logging:
       driver: "json-file"
       options:
@@ -39,8 +47,10 @@ services:
       context: ./oficios-portal-frontend
       dockerfile: Dockerfile
     container_name: oficios-frontend
+    expose:
+      - "3000"
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Manter para acesso direto durante transição
     environment:
       - NODE_ENV=production
       - W0_GMAIL_INGEST_URL=http://backend-python:8000/gmail/ingest
@@ -48,16 +58,29 @@ services:
       - ./oficios-portal-frontend/.env.production
     depends_on:
       backend-python:
-        condition: service_healthy
+        condition: service_started  # Mudado para não bloquear por health
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\""]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 60s
     restart: unless-stopped
     networks:
       - oficios-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.frontend.rule=Host(`oficio.ness.tec.br`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      # Redirect HTTP to HTTPS
+      - "traefik.http.routers.frontend-http.rule=Host(`oficio.ness.tec.br`)"
+      - "traefik.http.routers.frontend-http.entrypoints=web"
+      - "traefik.http.routers.frontend-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     logging:
       driver: "json-file"
       options:
@@ -67,6 +90,10 @@ services:
 networks:
   oficios-network:
     driver: bridge
+    name: oficios-network
+  traefik-network:
+    external: true
+    name: traefik-network
 
 volumes:
   emails-data:
